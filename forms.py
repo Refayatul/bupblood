@@ -79,6 +79,7 @@ class RegistrationForm(FlaskForm):
 class UserLoginForm(FlaskForm):
     identifier = StringField('Student ID / Mobile / Email', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
+    remember_me = BooleanField('Remember Me')
     submit = SubmitField('Login')
 
 class UpdateProfileForm(FlaskForm):

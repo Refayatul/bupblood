@@ -2318,27 +2318,30 @@ def user_login():
         
         if user and user.check_password(form.password.data):
             if user.is_deleted:
-                flash("Your account has been deleted. Please contact support.", "danger")
+                flash("⚠️ This account has been deactivated. Please contact the admin for assistance.", "danger")
                 return redirect(url_for('user_login'))
                 
             if not user.is_approved:
-                 flash("Your account is pending admin approval.", "warning")
-                 return redirect(url_for('home'))
+                flash("⏳ Your account is pending admin approval. You will receive an email once approved.", "warning")
+                return redirect(url_for('home'))
             
-            login_user(user)
+            remember = form.remember_me.data
+            login_user(user, remember=remember)
             
             # Check if profile needs completion (missing email or old department format or availability not set)
             all_programs = [p for programs in PROGRAM_DATA.values() for p in programs]
             needs_completion = not user.email or user.department not in all_programs or user.is_available is None
 
             if needs_completion:
-                flash("Please complete your profile with your email, updated department information, and availability status.", "info")
+                flash("ℹ️ Please complete your profile with your email, updated department information, and availability status.", "info")
                 return redirect(url_for('complete_profile'))
             
-            flash("Logged in successfully!", "success")
+            flash(f"✅ Welcome back, {user.name}! You are now logged in.", "success")
             return redirect(url_for('user_profile'))
+        elif user and not user.check_password(form.password.data):
+            flash("❌ Incorrect password. Please try again or use 'Forgot Password' to reset it.", "danger")
         else:
-            flash("Invalid credentials or password.", "danger")
+            flash("❌ No account found with that Student ID, mobile, or email address. Please check your details or register.", "danger")
     return render_template('user_login.html', form=form, current_palette=config.current_palette)
 
 @app.route('/user/profile', methods=['GET', 'POST'])
