@@ -1,0 +1,333 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="py-16 bg-gradient-to-br from-gray-50 to-white">
+    <div class="container mx-auto px-4 max-w-4xl">
+
+        <!-- Hero Section -->
+        <div class="text-center mb-12">
+            <div class="inline-block mb-6">
+                <div class="p-4 bg-gradient-to-r from-red-600 to-pink-600 rounded-2xl shadow-2xl">
+                    <i class="fas fa-heart text-4xl text-white"></i>
+                </div>
+            </div>
+            <h1
+                class="text-5xl font-extrabold mb-6 bg-gradient-to-r from-gray-800 to-red-600 bg-clip-text text-transparent">
+                Contact Us
+            </h1>
+            <p class="text-xl text-gray-600 leading-relaxed max-w-3xl mx-auto">
+                Get in touch with BUP Blood Bank. We're here to help you connect with our life-saving community and support your donation needs.
+            </p>
+        </div>
+
+        <!-- Quick Stats Section -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+            <div class="bg-white rounded-xl p-6 text-center shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300">
+                <div class="text-3xl font-bold text-red-600 mb-2">500+</div>
+                <div class="text-gray-600 font-medium">Active Donors</div>
+            </div>
+            <div class="bg-white rounded-xl p-6 text-center shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300">
+                <div class="text-3xl font-bold text-blue-600 mb-2">1000+</div>
+                <div class="text-gray-600 font-medium">Lives Saved</div>
+            </div>
+            <div class="bg-white rounded-xl p-6 text-center shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300">
+                <div class="text-3xl font-bold text-green-600 mb-2">24/7</div>
+                <div class="text-gray-600 font-medium">Available</div>
+            </div>
+            <div class="bg-white rounded-xl p-6 text-center shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300">
+                <div class="text-3xl font-bold text-purple-600 mb-2">5★</div>
+                <div class="text-gray-600 font-medium">Community Rating</div>
+            </div>
+        </div>
+
+        <!-- Get Involved Section -->
+        <div
+            class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-8 mb-12 border border-blue-100">
+            <h3 class="text-3xl font-bold text-gray-800 mb-6 text-center flex items-center justify-center gap-3">
+                <i class="fas fa-hand-holding-heart text-blue-600"></i> Get Involved
+            </h3>
+            <p class="text-lg text-gray-700 mb-6 text-center">
+                Ready to make a difference? Join our life-saving community today!
+            </p>
+            <div class="grid md:grid-cols-2 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-xl shadow-md">
+                    <h4 class="text-xl font-bold text-gray-800 mb-3 flex items-center gap-2">
+                        <i class="fas fa-user-plus text-green-600"></i> Become a Donor
+                    </h4>
+                    <p class="text-gray-600 mb-4">
+                        Share your life by donating blood. Help patients in critical need and earn the gratitude of your community.
+                    </p>
+                    {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('user_profile') }}" class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                        <i class="fas fa-user"></i> Manage Profile
+                    </a>
+                    {% else %}
+                    <a href="{{ url_for('register') }}" class="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                        <i class="fas fa-user-plus"></i> Register Now
+                    </a>
+                    {% endif %}
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md">
+                    <h4 class="text-xl font-bold text-gray-800 mb-3 flex items-center gap-2">
+                        <i class="fas fa-search text-red-600"></i> Find a Donor
+                    </h4>
+                    <p class="text-gray-600 mb-4">
+                        In urgent need of blood? Use our search feature to find compatible donors in your area quickly.
+                    </p>
+                    <a href="{{ url_for('home') }}" class="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                        <i class="fas fa-search"></i> Search Donors
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- About Us Section -->
+        <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-8 mb-12 border border-green-100 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center flex items-center justify-center gap-3">
+                <i class="fas fa-info-circle text-green-600"></i> About Us
+            </h2>
+            <p class="text-lg text-gray-700 leading-relaxed text-center mb-6">
+                Want to learn more about our mission, vision, and the story behind BUP Blood Bank? Discover how we're making a difference in our community and connecting donors with those in need.
+            </p>
+            <div class="text-center">
+                <a href="{{ url_for('about') }}" class="inline-flex items-center gap-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white px-8 py-4 rounded-full font-bold hover:from-green-700 hover:to-emerald-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                    <i class="fas fa-external-link-alt"></i> Learn More About Us
+                    <i class="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Mission Section -->
+        <div
+            class="bg-white rounded-2xl shadow-xl p-8 border border-gray-100 mb-12 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center flex items-center justify-center gap-3">
+                <i class="fas fa-bullseye text-red-600"></i> Our Mission
+            </h2>
+            <p class="text-lg text-gray-700 leading-relaxed text-center">
+                We believe in fostering a community where no one struggles to find blood in times of need. Our goal is
+                to bridge the gap between blood donors and recipients by offering an easy-to-use platform that connects
+                both parties.
+            </p>
+        </div>
+
+        <!-- How We Work Section -->
+        <div
+            class="bg-white rounded-2xl shadow-xl p-8 border border-gray-100 mb-12 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center flex items-center justify-center gap-3">
+                <i class="fas fa-cogs text-blue-600"></i>How We Work
+            </h2>
+            <p class="text-lg text-gray-700 leading-relaxed text-center">
+                The BUP Blood Bank operates as a volunteer-driven effort. We collect a database of registered blood
+                donors and allow those in need of blood to search for a match. We also ensure confidentiality and
+                convenience by making the process quick and straightforward.
+            </p>
+        </div>
+
+        <!-- FAQ Section -->
+        <div class="bg-white rounded-2xl shadow-xl p-8 border border-gray-100 mb-12 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center flex items-center justify-center gap-3">
+                <i class="fas fa-question-circle text-orange-600"></i> Frequently Asked Questions
+            </h2>
+            <div class="space-y-4">
+                <details class="bg-gray-50 rounded-lg p-4 cursor-pointer">
+                    <summary class="font-semibold text-gray-800 flex items-center justify-between">
+                        <span>Is blood donation safe?</span>
+                        <i class="fas fa-chevron-down transform transition-transform duration-200 text-gray-500"></i>
+                    </summary>
+                    <p class="text-gray-600 mt-3 pl-6 border-l-4 border-red-200">
+                        Yes, blood donation is completely safe. Trained professionals use sterile disposable equipment for each donor. The human body typically replaces the volume of donated blood within 24-48 hours.
+                    </p>
+                </details>
+                <details class="bg-gray-50 rounded-lg p-4 cursor-pointer">
+                    <summary class="font-semibold text-gray-800 flex items-center justify-between">
+                        <span>How often can I donate blood?</span>
+                        <i class="fas fa-chevron-down transform transition-transform duration-200 text-gray-500"></i>
+                    </summary>
+                    <p class="text-gray-600 mt-3 pl-6 border-l-4 border-red-200">
+                        Males can donate every 3 months (12 weeks) and females can donate every 4 months. Consult with medical professionals for your specific situation.
+                    </p>
+                </details>
+                <details class="bg-gray-50 rounded-lg p-4 cursor-pointer">
+                    <summary class="font-semibold text-gray-800 flex items-center justify-between">
+                        <span>Can anyone become a blood donor?</span>
+                        <i class="fas fa-chevron-down transform transition-transform duration-200 text-gray-500"></i>
+                    </summary>
+                    <p class="text-gray-600 mt-3 pl-6 border-l-4 border-red-200">
+                        While blood donation is crucial for saving lives, there are eligibility criteria. You must be at least 18 years old, weigh at least 45kg, and be in good health. Contact us for complete eligibility requirements.
+                    </p>
+                </details>
+            </div>
+        </div>
+
+
+        <!-- Contact Section -->
+        <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-8 border border-purple-100">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center flex items-center justify-center gap-3">
+                <i class="fas fa-envelope text-purple-600"></i> Contact Us
+            </h2>
+            <p class="text-lg text-gray-700 leading-relaxed text-center mb-6">
+                For inquiries, suggestions, or support, feel free to reach out to us at:
+            </p>
+            <div class="flex justify-center">
+                <a href="mailto:refayat.connect@gmail.com" onclick="copyEmail(event)"
+                    class="inline-block text-xl font-bold text-purple-600 hover:text-purple-700 hover:underline transition-colors duration-300 bg-white px-6 py-3 rounded-full shadow-lg hover:shadow-xl transform hover:-translate-y-1 font-semibold break-all cursor-pointer">
+                    refayat.connect@gmail.com
+                </a>
+            </div>
+        </div>
+
+        <!-- Call to Action -->
+        <div class="mt-12 text-center">
+            <div class="bg-gradient-to-r from-red-600 to-pink-600 rounded-2xl p-8 text-white shadow-2xl">
+                {% if current_user.is_authenticated %}
+                <h3 class="text-3xl font-bold mb-4">Welcome Back, {{ current_user.name }}!</h3>
+                <p class="text-lg leading-relaxed mb-6">
+                    Continue making a difference in our community. Access your profile or find donors in need.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <a href="{{ url_for('user_profile') }}"
+                        class="inline-flex items-center gap-3 bg-white text-red-600 py-4 px-8 rounded-full font-bold hover:bg-gray-100 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                        <i class="fas fa-user"></i> My Profile
+                    </a>
+                    <a href="{{ url_for('home') }}"
+                        class="inline-flex items-center gap-3 bg-transparent border-2 border-white text-white py-4 px-8 rounded-full font-bold hover:bg-white hover:text-red-600 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                        <i class="fas fa-search"></i> Find Donors
+                    </a>
+                </div>
+                {% else %}
+                <h3 class="text-3xl font-bold mb-4">Ready to Make a Difference?</h3>
+                <p class="text-lg leading-relaxed mb-6">
+                    Join our community of life-saving heroes today. Register as a donor and help save lives.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <a href="{{ url_for('register') }}"
+                        class="inline-flex items-center gap-3 bg-white text-red-600 py-4 px-8 rounded-full font-bold hover:bg-gray-100 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                        <i class="fas fa-user-plus"></i> Register Now
+                    </a>
+                    <a href="{{ url_for('home') }}"
+                        class="inline-flex items-center gap-3 bg-transparent border-2 border-white text-white py-4 px-8 rounded-full font-bold hover:bg-white hover:text-red-600 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                        <i class="fas fa-search"></i> Find Donors
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Toast Notification -->
+<div id="copyToast"
+    class="hidden fixed top-20 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-2xl transform translate-x-full transition-transform duration-300 z-50 flex items-center gap-2">
+    <i class="fas fa-check-circle"></i>
+    <span>Email copied to clipboard!</span>
+</div>
+
+<!-- Email Modal -->
+<div id="emailModal"
+    class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full transform scale-95 transition-transform duration-300"
+        id="modalContent">
+        <div class="bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-4 rounded-t-2xl">
+            <h3 class="text-2xl font-bold text-white flex items-center gap-2">
+                <i class="fas fa-envelope"></i> Send Email?
+            </h3>
+        </div>
+        <div class="p-6">
+            <p class="text-gray-700 text-lg mb-2 flex items-center gap-2">
+                <i class="fas fa-check-circle text-green-600"></i> Email copied to clipboard!
+            </p>
+            <p class="text-gray-600 mb-4">Choose how you'd like to send your email:</p>
+
+            <div class="space-y-3">
+                <!-- Gmail Web -->
+                <a href="https://mail.google.com/mail/?view=cm&fs=1&to=refayat.connect@gmail.com" target="_blank"
+                    class="flex items-center gap-3 bg-gradient-to-r from-red-500 to-red-600 text-white py-3 px-4 rounded-lg font-bold hover:from-red-600 hover:to-red-700 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 w-full">
+                    <i class="fab fa-google text-xl"></i>
+                    <span>Open Gmail</span>
+                </a>
+
+                <!-- Outlook Web -->
+                <a href="https://outlook.live.com/mail/0/deeplink/compose?to=refayat.connect@gmail.com" target="_blank"
+                    class="flex items-center gap-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white py-3 px-4 rounded-lg font-bold hover:from-blue-600 hover:to-blue-700 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 w-full">
+                    <i class="fab fa-microsoft text-xl"></i>
+                    <span>Open Outlook</span>
+                </a>
+
+                <!-- Default Mail App -->
+                <a href="mailto:refayat.connect@gmail.com"
+                    class="flex items-center gap-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white py-3 px-4 rounded-lg font-bold hover:from-purple-600 hover:to-purple-700 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 w-full">
+                    <i class="fas fa-at text-xl"></i>
+                    <span>Default Mail App</span>
+                </a>
+
+                <!-- Maybe Later -->
+                <button onclick="closeModal()"
+                    class="w-full bg-gray-200 text-gray-700 py-3 px-4 rounded-lg font-bold hover:bg-gray-300 transition-all shadow-md hover:shadow-lg">
+                    Maybe Later
+                </button>
+            </div>
+
+            <p class="text-xs text-gray-500 mt-4 text-center">
+                <i class="fas fa-info-circle"></i> Email already copied to clipboard
+            </p>
+        </div>
+    </div>
+</div>
+
+<script>
+    function copyEmail(event) {
+        event.preventDefault();
+
+        const email = 'refayat.connect@gmail.com';
+
+        // Copy to clipboard
+        navigator.clipboard.writeText(email).then(() => {
+            // Show toast notification
+            const toast = document.getElementById('copyToast');
+            toast.classList.remove('hidden', 'translate-x-full');
+            toast.classList.add('translate-x-0');
+
+            // Show modal after a brief delay and hide toast
+            setTimeout(() => {
+                // Hide toast immediately when modal appears
+                toast.classList.remove('translate-x-0');
+                toast.classList.add('translate-x-full');
+                setTimeout(() => {
+                    toast.classList.add('hidden');
+                }, 300);
+                // Show modal
+                showModal();
+            }, 800);
+        }).catch(err => {
+            console.error('Failed to copy:', err);
+            alert('Email: refayat.connect@gmail.com');
+        });
+    }
+
+    function showModal() {
+        const modal = document.getElementById('emailModal');
+        const content = document.getElementById('modalContent');
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            content.classList.remove('scale-95');
+            content.classList.add('scale-100');
+        }, 10);
+    }
+
+    function closeModal() {
+        const modal = document.getElementById('emailModal');
+        const content = document.getElementById('modalContent');
+        content.classList.remove('scale-100');
+        content.classList.add('scale-95');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 300);
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('emailModal')?.addEventListener('click', (e) => {
+        if (e.target.id === 'emailModal') {
+            closeModal();
+        }
+    });
+</script>
+{% endblock %}

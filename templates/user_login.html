@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+{% block container_class %}{% endblock %}
+
+{% block content %}
+<section class="py-2 bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen">
+    <div class="container mx-auto px-4">
+        <div class="max-w-md mx-auto">
+            <div class="text-center mb-3">
+                <div class="inline-block p-4 bg-gradient-to-r from-red-600 to-pink-600 rounded-2xl shadow-2xl mb-4">
+                    <i class="fas fa-user-lock text-3xl text-white"></i>
+                </div>
+                <h2
+                    class="text-3xl font-extrabold bg-gradient-to-r from-gray-800 to-red-600 bg-clip-text text-transparent mb-2">
+                    Donor Login
+                </h2>
+                <p class="text-gray-600 mt-2">Sign in to your donor account</p>
+            </div>
+
+            <div
+                class="bg-white rounded-2xl shadow-2xl p-6 border border-gray-100 hover:shadow-3xl transition-all duration-300 transform hover:-translate-y-1">
+                <form method="POST" action="" enctype="multipart/form-data" class="space-y-5">
+                    {{ form.hidden_tag() }}
+
+                    <div class="group">
+                        <label class="block text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
+                            <i class="fas fa-user text-gray-400"></i> Student ID / Mobile / Email
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fas fa-user text-gray-400"></i>
+                            </div>
+                            {{ form.identifier(class="w-full p-4 pl-10 border border-gray-200 rounded-xl focus:ring-4
+                            focus:ring-red-500 focus:border-transparent transition-all shadow-sm group-hover:shadow-md
+                            bg-gradient-to-r from-gray-50 to-white", placeholder="Student ID, Mobile, or Email") }}
+                        </div>
+                    </div>
+
+                    <div class="group">
+                        <label class="block text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
+                            <i class="fas fa-lock text-gray-400"></i> Password
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fas fa-lock text-gray-400"></i>
+                            </div>
+                            {{ form.password(class="w-full p-4 pl-10 pr-12 border border-gray-200 rounded-xl
+                            focus:ring-4
+                            focus:ring-red-500 focus:border-transparent transition-all shadow-sm group-hover:shadow-md
+                            bg-gradient-to-r from-gray-50 to-white", placeholder="Enter your password", id="password")
+                            }}
+                            <button type="button" onclick="togglePassword('password', 'eye-icon')"
+                                class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none z-10">
+                                <i id="eye-icon" class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-end">
+                        <a href="{{ url_for('forgot_password') }}"
+                            class="text-sm text-red-600 hover:text-red-700 hover:underline transition-colors duration-300 font-medium">
+                            Forgot Password?
+                        </a>
+                    </div>
+
+                    <div class="text-center">
+                        {{ form.submit(class="w-full bg-gradient-to-r from-red-600 to-pink-600 text-white py-4 px-8
+                        rounded-xl hover:from-red-700 hover:to-pink-700 transition-all duration-300 shadow-lg
+                        hover:shadow-xl transform hover:-translate-y-1 font-bold text-lg cursor-pointer flex
+                        items-center justify-center gap-2 group") }}
+                    </div>
+                </form>
+
+                <div class="mt-6 text-center">
+                    <p class="text-gray-600">
+                        Don't have an account?
+                        <a href="{{ url_for('register') }}"
+                            class="text-red-600 hover:text-red-700 font-bold hover:underline transition-colors duration-300">
+                            Register here
+                        </a>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Additional Info -->
+            <div class="mt-8 text-center">
+                <div
+                    class="inline-flex items-center gap-2 bg-white rounded-full px-6 py-3 shadow-lg border border-gray-100">
+                    <i class="fas fa-shield-alt text-green-500"></i>
+                    <span class="text-sm text-gray-600 font-medium">Your information is secure with us</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<script>
+    function togglePassword(inputId, iconId) {
+        const input = document.getElementById(inputId);
+        const icon = document.getElementById(iconId);
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            input.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    }
+</script>
+{% endblock %}

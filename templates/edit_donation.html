@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="py-16 bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100 min-h-screen flex items-center">
+    <div class="container mx-auto max-w-2xl px-4">
+        <div
+            class="bg-white p-10 rounded-3xl shadow-2xl border border-gray-100 hover:shadow-3xl transition-all duration-500 transform hover:-translate-y-1 animate-fade-in">
+            <div class="flex items-center mb-8 animate-slide-in">
+                <div
+                    class="p-4 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-2xl mr-5 shadow-xl transform hover:scale-110 transition-transform duration-300">
+                    <i class="fas fa-edit text-2xl"></i>
+                </div>
+                <div>
+                    <h2 class="text-3xl font-extrabold text-gray-800 mb-2">Edit Donation Record</h2>
+                    <p class="text-gray-600 text-base font-medium">Update your donation information</p>
+                </div>
+            </div>
+
+            <form method="POST" class="space-y-8">
+                {{ form.hidden_tag() }}
+
+                <div class="group animate-slide-in" style="animation-delay: 0.1s;">
+                    {{ form.donation_date.label(class="block text-gray-700 font-bold mb-3 text-sm uppercase
+                    tracking-wide flex items-center gap-2") }}
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i class="fas fa-calendar text-blue-400"></i>
+                        </div>
+                        {{ form.donation_date(class="w-full p-4 pl-10 bg-gradient-to-r from-blue-50 to-indigo-50
+                        border-2 border-blue-100 rounded-2xl focus:ring-4 focus:ring-blue-500 focus:border-blue-500
+                        transition-all duration-300 shadow-sm group-hover:shadow-lg") }}
+                    </div>
+                    {% if form.donation_date.errors %}
+                    {% for error in form.donation_date.errors %}
+                    <div class="flex items-center mt-3 p-3 bg-red-50 border border-red-200 rounded-xl">
+                        <i class="fas fa-exclamation-circle text-red-500 mr-3"></i>
+                        <span class="text-red-600 text-sm font-medium">{{ error }}</span>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+
+                <div class="group animate-slide-in" style="animation-delay: 0.2s;">
+                    {{ form.location.label(class="block text-gray-700 font-bold mb-3 text-sm uppercase tracking-wide
+                    flex items-center gap-2") }}
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i class="fas fa-map-marker-alt text-green-400"></i>
+                        </div>
+                        {{ form.location(class="w-full p-4 pl-10 bg-gradient-to-r from-green-50 to-emerald-50 border-2
+                        border-green-100 rounded-2xl focus:ring-4 focus:ring-green-500 focus:border-green-500
+                        transition-all duration-300 shadow-sm group-hover:shadow-lg", placeholder="e.g. Square
+                        Hospital") }}
+                    </div>
+                    {% if form.location.errors %}
+                    {% for error in form.location.errors %}
+                    <div class="flex items-center mt-3 p-3 bg-red-50 border border-red-200 rounded-xl">
+                        <i class="fas fa-exclamation-circle text-red-500 mr-3"></i>
+                        <span class="text-red-600 text-sm font-medium">{{ error }}</span>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+
+                <div class="group animate-slide-in" style="animation-delay: 0.3s;">
+                    {{ form.notes.label(class="block text-gray-700 font-bold mb-3 text-sm uppercase tracking-wide flex
+                    items-center gap-2") }}
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i class="fas fa-sticky-note text-purple-400"></i>
+                        </div>
+                        {{ form.notes(class="w-full p-4 pl-10 bg-gradient-to-r from-purple-50 to-pink-50 border-2
+                        border-purple-100 rounded-2xl focus:ring-4 focus:ring-purple-500 focus:border-purple-500
+                        transition-all duration-300 shadow-sm group-hover:shadow-lg", placeholder="Optional notes about
+                        your donation") }}
+                    </div>
+                    {% if form.notes.errors %}
+                    {% for error in form.notes.errors %}
+                    <div class="flex items-center mt-3 p-3 bg-red-50 border border-red-200 rounded-xl">
+                        <i class="fas fa-exclamation-circle text-red-500 mr-3"></i>
+                        <span class="text-red-600 text-sm font-medium">{{ error }}</span>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+
+                <div class="flex gap-6 justify-end pt-6 border-t-2 border-gray-100 animate-slide-in"
+                    style="animation-delay: 0.4s;">
+                    <a href="{{ url_for('user_profile') }}"
+                        class="bg-gradient-to-r from-gray-400 to-gray-500 text-white py-4 px-8 rounded-2xl font-bold hover:from-gray-500 hover:to-gray-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 flex items-center group">
+                        <i class="fas fa-times mr-3 group-hover:rotate-180 transition-transform duration-300"></i>Cancel
+                    </a>
+                    {{ form.submit(class="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white py-4
+                    px-10 rounded-2xl font-bold hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700
+                    transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:-translate-y-1 cursor-pointer
+                    flex items-center group") }}
+                </div>
+            </form>
+        </div>
+
+        <!-- Additional Info -->
+        <div class="mt-8 text-center animate-fade-in" style="animation-delay: 0.5s;">
+            <div
+                class="inline-flex items-center gap-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-full px-8 py-4 shadow-lg border border-green-100">
+                <div class="p-2 bg-green-100 rounded-full">
+                    <i class="fas fa-heart text-green-600"></i>
+                </div>
+                <span class="text-sm text-gray-700 font-semibold">Every donation saves lives</span>
+                <i class="fas fa-tint text-red-500"></i>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    @keyframes fade-in {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slide-in {
+        from {
+            opacity: 0;
+            transform: translateY(30px) scale(0.9);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    .animate-fade-in {
+        animation: fade-in 0.8s ease-out forwards;
+    }
+
+    .animate-slide-in {
+        animation: slide-in 0.6s ease-out forwards;
+    }
+</style>
+{% endblock %}

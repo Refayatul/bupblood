@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+
+{% block container_class %}{% endblock %}
+
+{% block content %}
+<section class="py-2 bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100 min-h-screen">
+    <div class="container mx-auto px-4">
+        <div class="max-w-md mx-auto">
+            <div class="text-center mb-3 animate-fade-in">
+                <div
+                    class="inline-block p-5 bg-gradient-to-r from-green-600 to-emerald-600 rounded-3xl shadow-2xl mb-4 transform hover:scale-110 transition-transform duration-300">
+                    <i class="fas fa-shield-alt text-4xl text-white animate-bounce"></i>
+                </div>
+                <h1
+                    class="text-4xl font-extrabold bg-gradient-to-r from-gray-800 via-green-600 to-emerald-600 bg-clip-text text-transparent mb-2">
+                    Admin Login
+                </h1>
+                <p class="text-gray-600 text-lg">Access the admin panel</p>
+            </div>
+
+            <div
+                class="bg-white rounded-3xl shadow-2xl p-6 border border-gray-100 hover:shadow-3xl transition-all duration-500 transform hover:-translate-y-2 bg-gradient-to-br from-white to-gray-50">
+                <form method="POST" class="space-y-5">
+                    <div class="group animate-slide-in">
+                        <label class="block text-sm font-bold text-gray-700 mb-3 flex items-center gap-3">
+                            <div class="p-2 bg-green-100 rounded-lg">
+                                <i class="fas fa-user text-green-600"></i>
+                            </div>
+                            <span>Username</span>
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fas fa-user text-gray-400"></i>
+                            </div>
+                            <input type="text" name="username"
+                                class="w-full p-4 pl-10 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-green-500 focus:border-green-500 transition-all duration-300 shadow-sm hover:shadow-md bg-gradient-to-r from-gray-50 to-white"
+                                placeholder="Enter admin username">
+                        </div>
+                    </div>
+
+                    <div class="group animate-slide-in" style="animation-delay: 0.1s;">
+                        <label class="block text-sm font-bold text-gray-700 mb-3 flex items-center gap-3">
+                            <div class="p-2 bg-green-100 rounded-lg">
+                                <i class="fas fa-lock text-green-600"></i>
+                            </div>
+                            <span>Password</span>
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fas fa-lock text-gray-400"></i>
+                            </div>
+                            <input type="password" name="password" id="adminPassword"
+                                class="w-full p-4 pl-10 pr-12 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-green-500 focus:border-green-500 transition-all duration-300 shadow-sm hover:shadow-md bg-gradient-to-r from-gray-50 to-white"
+                                placeholder="Enter admin password">
+                            <button type="button" onclick="togglePassword()"
+                                class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none z-10">
+                                <i id="eyeIcon" class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="text-center animate-slide-in" style="animation-delay: 0.2s;">
+                        <button type="submit"
+                            class="w-full bg-gradient-to-r from-green-600 via-green-500 to-emerald-600 text-white py-4 px-8 rounded-2xl hover:from-green-700 hover:via-green-600 hover:to-emerald-700 transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:-translate-y-1 font-bold text-lg cursor-pointer flex items-center justify-center gap-3 group">
+                            <i class="fas fa-sign-in-alt group-hover:animate-pulse"></i> Login to Admin Panel
+                            <i class="fas fa-arrow-right transition-transform group-hover:translate-x-1"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Security Info -->
+            <div class="mt-8 text-center animate-fade-in" style="animation-delay: 0.3s;">
+                <div
+                    class="inline-flex items-center gap-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-full px-8 py-4 shadow-lg border border-green-100 transform hover:scale-105 transition-all duration-300">
+                    <div class="p-3 bg-green-100 rounded-full">
+                        <i class="fas fa-shield-alt text-green-600 text-xl"></i>
+                    </div>
+                    <span class="text-sm text-gray-700 font-semibold">Secure Admin Access Only</span>
+                    <i class="fas fa-lock text-green-500"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    function togglePassword() {
+        const input = document.getElementById('adminPassword');
+        const icon = document.getElementById('eyeIcon');
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            input.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    }
+</script>
+
+<style>
+    @keyframes fade-in {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slide-in {
+        from {
+            opacity: 0;
+            transform: translateY(30px) scale(0.9);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    .animate-fade-in {
+        animation: fade-in 0.8s ease-out forwards;
+    }
+
+    .animate-slide-in {
+        animation: slide-in 0.6s ease-out forwards;
+    }
+
+    .animate-bounce {
+        animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+
+        0%,
+        20%,
+        53%,
+        80%,
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+
+        40%,
+        43% {
+            transform: translate3d(0, -6px, 0);
+        }
+
+        70% {
+            transform: translate3d(0, -4px, 0);
+        }
+
+        90% {
+            transform: translate3d(0, -2px, 0);
+        }
+    }
+</style>
+{% endblock %}

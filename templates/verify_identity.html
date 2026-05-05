@@ -1,0 +1,312 @@
+{% extends 'base.html' %}
+
+{% block container_class %}{% endblock %}
+
+{% block content %}
+<section class="py-2 bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100 min-h-screen">
+    <div class="container mx-auto px-4">
+        <div class="max-w-md mx-auto">
+            <div class="text-center mb-3 animate-fade-in">
+                <div
+                    class="inline-block p-5 bg-gradient-to-r from-red-600 to-pink-600 rounded-3xl shadow-2xl mb-4 transform hover:scale-110 transition-transform duration-300">
+                    <i class="fas fa-question-circle text-4xl text-white animate-bounce"></i>
+                </div>
+                <h2
+                    class="text-4xl font-extrabold bg-gradient-to-r from-gray-800 via-red-600 to-pink-600 bg-clip-text text-transparent mb-2">
+                    Forgot Password
+                </h2>
+                <p class="text-gray-600 text-lg">Enter your details to verify your identity</p>
+            </div>
+
+            <div
+                class="bg-white rounded-3xl shadow-2xl p-6 border border-gray-100 hover:shadow-3xl transition-all duration-500 transform hover:-translate-y-2 bg-gradient-to-br from-white to-gray-50">
+                <form method="POST" action="" class="space-y-5">
+                    {{ form.hidden_tag() }}
+
+                    <div class="group animate-slide-in">
+                        <label class="block text-sm font-bold text-gray-700 mb-3 flex items-center gap-3">
+                            <div class="p-2 bg-red-100 rounded-lg">
+                                <i class="fas fa-id-card text-red-600"></i>
+                            </div>
+                            <span>{{ form.student_id.label }}</span>
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fas fa-id-card text-gray-400"></i>
+                            </div>
+                            {{ form.student_id(class="w-full p-4 pl-10 border-2 border-gray-200 rounded-2xl focus:ring-4
+                            focus:ring-red-500 focus:border-red-500 transition-all duration-300 shadow-sm
+                            hover:shadow-md bg-gradient-to-r from-gray-50 to-white", placeholder="Enter Student ID") }}
+                        </div>
+                    </div>
+
+                    <div class="group animate-slide-in" style="animation-delay: 0.1s;">
+                        <label class="block text-sm font-bold text-gray-700 mb-3 flex items-center gap-3">
+                            <div class="p-2 bg-blue-100 rounded-lg">
+                                <i class="fas fa-phone text-blue-600"></i>
+                            </div>
+                            <span>{{ form.mobile.label }}</span>
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fas fa-phone text-gray-400"></i>
+                            </div>
+                            {{ form.mobile(class="w-full p-4 pl-10 border-2 border-gray-200 rounded-2xl focus:ring-4
+                            focus:ring-red-500 focus:border-red-500 transition-all duration-300 shadow-sm
+                            hover:shadow-md bg-gradient-to-r from-gray-50 to-white", placeholder="01XXXXXXXXX") }}
+                        </div>
+                    </div>
+
+                    <!-- Faculty Dropdown -->
+                    <div class="group animate-slide-in" style="animation-delay: 0.2s;">
+                        <label class="block text-sm font-bold text-gray-700 mb-3 flex items-center gap-3">
+                            <div class="p-2 bg-green-100 rounded-lg">
+                                <i class="fas fa-university text-green-600"></i>
+                            </div>
+                            Faculty
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fas fa-university text-gray-400"></i>
+                            </div>
+                            <select id="facultySelect"
+                                class="w-full p-4 pl-10 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-red-500 focus:border-red-500 transition-all duration-300 shadow-sm hover:shadow-md bg-gradient-to-r from-gray-50 to-white">
+                                <option value="">Select Faculty</option>
+                                <option value="FST">Faculty of Science and Technology (FST)</option>
+                                <option value="FASS">Faculty of Arts & Social Sciences (FASS)</option>
+                                <option value="FBS">Faculty of Business Studies (FBS)</option>
+                                <option value="FSSS">Faculty of Security & Strategic Studies (FSSS)</option>
+                                <option value="FMS">Faculty of Medical Studies (FMS)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Program Dropdown -->
+                    <div class="group animate-slide-in" style="animation-delay: 0.25s;">
+                        <label class="block text-sm font-bold text-gray-700 mb-3 flex items-center gap-3">
+                            <div class="p-2 bg-purple-100 rounded-lg">
+                                <i class="fas fa-graduation-cap text-purple-600"></i>
+                            </div>
+                            Program
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fas fa-graduation-cap text-gray-400"></i>
+                            </div>
+                            <select id="programSelect"
+                                class="w-full p-4 pl-10 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-red-500 focus:border-red-500 transition-all duration-300 shadow-sm hover:shadow-md bg-gradient-to-r from-gray-50 to-white"
+                                disabled>
+                                <option value="">Select Faculty First</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Hidden form fields -->
+                    <div class="hidden">
+                        {{ form.faculty(id="facultyHidden") }}
+                        {{ form.program(id="programHidden") }}
+                    </div>
+
+                    <div class="group animate-slide-in" style="animation-delay: 0.3s;">
+                        <label class="block text-sm font-bold text-gray-700 mb-3 flex items-center gap-3">
+                            <div class="p-2 bg-red-100 rounded-lg">
+                                <i class="fas fa-tint text-red-600"></i>
+                            </div>
+                            <span>{{ form.blood_group.label }}</span>
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <i class="fas fa-tint text-gray-400"></i>
+                            </div>
+                            {{ form.blood_group(class="w-full p-4 pl-10 border-2 border-gray-200 rounded-2xl
+                            focus:ring-4 focus:ring-red-500 focus:border-red-500 transition-all duration-300 shadow-sm
+                            hover:shadow-md bg-gradient-to-r from-gray-50 to-white") }}
+                        </div>
+                    </div>
+
+                    <div class="text-center animate-slide-in" style="animation-delay: 0.4s;">
+                        {{ form.submit(class="w-full bg-gradient-to-r from-red-600 via-red-500 to-pink-600 text-white
+                        py-4 px-8 rounded-2xl hover:from-red-700 hover:via-red-600 hover:to-pink-700 transition-all
+                        duration-300 shadow-xl hover:shadow-2xl transform hover:-translate-y-1 font-bold text-lg
+                        cursor-pointer flex items-center justify-center gap-3 group") }}
+                    </div>
+                </form>
+
+                <div class="mt-6 text-center animate-slide-in" style="animation-delay: 0.5s;">
+                    <a href="{{ url_for('user_login') }}"
+                        class="text-gray-600 hover:text-red-600 hover:underline transition-all duration-300 font-medium inline-flex items-center gap-2 group">
+                        <i class="fas fa-arrow-left group-hover:-translate-x-1 transition-transform"></i> Back to Login
+                    </a>
+                </div>
+            </div>
+
+            <!-- Security Info -->
+            <div class="mt-8 text-center animate-fade-in" style="animation-delay: 0.6s;">
+                <div
+                    class="inline-flex items-center gap-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-full px-8 py-4 shadow-lg border border-green-100 transform hover:scale-105 transition-all duration-300">
+                    <div class="p-3 bg-green-100 rounded-full">
+                        <i class="fas fa-shield-alt text-green-600 text-xl"></i>
+                    </div>
+                    <span class="text-sm text-gray-700 font-semibold">Your information is secure with us</span>
+                    <i class="fas fa-lock text-green-500"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    // Official BUP Programs organized by Faculty
+    const programsByFaculty = {
+        'FST': [
+            'BSc in Computer Science and Engineering',
+            'BSc in Information and Communication Engineering',
+            'BSc in Environmental Science',
+            'MSc in Computer Science and Engineering',
+            'MSc in Information and Communication Engineering',
+            'MSc in Information and Communication Technology',
+            'MSc in Information Systems Security',
+            'MSc in Cyber Security',
+            'MSc in Environmental Science',
+            'MSc in Environmental Science and Management',
+            'Master in Environmental Science'
+        ],
+        'FASS': [
+            'BSS in Disaster Management and Resilience',
+            'BSS in Sociology',
+            'BSS in Economics',
+            'BSS in Disaster and Human Security Management',
+            'BSS in Development Studies',
+            'BSS in Public Administration',
+            'BA in English',
+            'Bachelor of Arts (BA)',
+            'Bachelor of Social Science (BSS)',
+            'Modern Languages',
+            'MSS in Disaster Management and Resilience',
+            'MSS in Sociology',
+            'MA in Development Studies',
+            'MA in English Language Teaching and Applied Linguistics',
+            'Master of Public Administration (MPA)',
+            'MSS in Development Studies',
+            'MA in English Literature and Cultural Studies',
+            'MSS in Economics',
+            'MSS in Disaster and Human Security Management',
+            'MA in Development Studies'
+        ],
+        'FBS': [
+            'BBA in Management Studies',
+            'BBA in Marketing',
+            'BBA in Accounting and Information Systems',
+            'BBA in Finance and Banking',
+            'Bachelor of Business Administration (BBA)',
+            'MBA in Marketing',
+            'MBA in Finance and Banking',
+            'MBA in Accounting and Information Systems',
+            'MBA in Human Resource Management',
+            'Master of Business Administration (MBA)'
+        ],
+        'FSSS': [
+            'BSS in Peace, Conflict and Human Rights Studies',
+            'BSS in Mass Communication and Journalism',
+            'BSS in International Relations',
+            'Bachelor of Laws (LLB)',
+            'MSS in Mass Communication and Journalism',
+            'Master of Laws (LLM)',
+            'MSS in International Relations',
+            'Master in Peace, Conflict and Human Rights Studies',
+            'Master in Peace and Human Rights Development Studies'
+        ],
+        'FMS': [
+            'MPH in Epidemiology',
+            'Certificate in Hospital Management'
+        ]
+    };
+
+    const facultySelect = document.getElementById('facultySelect');
+    const programSelect = document.getElementById('programSelect');
+    const facultyHidden = document.getElementById('facultyHidden');
+    const programHidden = document.getElementById('programHidden');
+
+    facultySelect.addEventListener('change', function () {
+        const faculty = this.value;
+        programSelect.innerHTML = '<option value="">Select Program</option>';
+        programSelect.disabled = !faculty;
+        facultyHidden.value = faculty;  // Update hidden form field
+        programHidden.value = '';  // Clear program when faculty changes
+
+        if (faculty && programsByFaculty[faculty]) {
+            programsByFaculty[faculty].forEach(program => {
+                const option = document.createElement('option');
+                option.value = program;
+                option.textContent = program;
+                programSelect.appendChild(option);
+            });
+        }
+    });
+
+    programSelect.addEventListener('change', function () {
+        programHidden.value = this.value;  // Update hidden form field
+    });
+</script>
+<style>
+    @keyframes fade-in {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slide-in {
+        from {
+            opacity: 0;
+            transform: translateY(30px) scale(0.9);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    .animate-fade-in {
+        animation: fade-in 0.8s ease-out forwards;
+    }
+
+    .animate-slide-in {
+        animation: slide-in 0.6s ease-out forwards;
+    }
+
+    .animate-bounce {
+        animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+
+        0%,
+        20%,
+        53%,
+        80%,
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+
+        40%,
+        43% {
+            transform: translate3d(0, -6px, 0);
+        }
+
+        70% {
+            transform: translate3d(0, -4px, 0);
+        }
+
+        90% {
+            transform: translate3d(0, -2px, 0);
+        }
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,1424 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="py-2 bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100 min-h-screen">
+    <div class="container mx-auto px-4">
+        <!-- Reduced Header & Enhanced Search -->
+        <div class="flex flex-col md:flex-row justify-between items-center gap-2 mb-4 animate-fade-in">
+            <h1 class="text-2xl font-black text-gray-800 tracking-tight flex items-center gap-2">
+                <i class="fas fa-shield-alt text-red-600"></i> Admin<span class="text-gray-400">Panel</span>
+            </h1>
+
+            <!-- Enhanced Search Bar -->
+            <form action="{{ url_for('admin_search') }}" method="GET" class="relative w-full md:w-96 group">
+                <div
+                    class="absolute -inset-0.5 bg-gradient-to-r from-red-600 to-blue-600 rounded-xl opacity-20 group-hover:opacity-60 transition duration-500 blur-sm">
+                </div>
+                <div class="relative bg-white rounded-xl flex items-center p-1 shadow-sm">
+                    <i class="fas fa-search text-gray-400 ml-3 text-sm"></i>
+                    <input type="text" name="q" value="{{ search_query if search_query else '' }}"
+                        placeholder="Search donors, students..."
+                        class="w-full bg-transparent border-none outline-none focus:outline-none focus:ring-0 focus:border-none ring-0 text-gray-700 placeholder-gray-400 font-medium px-3 py-2 text-sm"
+                        onkeyup="filterTable()">
+                </div>
+            </form>
+        </div>
+
+
+
+        {% if search_results is defined %}
+        <!-- Search Results -->
+        <div class="bg-white rounded-2xl shadow-2xl p-8 mb-12 border border-gray-100 animate-fade-in">
+            <div class="flex items-center justify-between mb-8">
+                <h2 class="text-3xl font-bold text-gray-800 flex items-center gap-3">
+                    <i class="fas fa-list text-blue-600"></i> Search Results
+                    <span class="text-sm font-normal text-gray-500 bg-gray-100 px-3 py-1 rounded-full">{{
+                        search_results|length }} found</span>
+                </h2>
+                <a href="{{ url_for('admin_panel') }}"
+                    class="text-gray-500 hover:text-gray-700 font-medium flex items-center gap-2">
+                    <i class="fas fa-times"></i> Clear Search
+                </a>
+            </div>
+
+            {% if search_results %}
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-50 border-b border-gray-200 text-xs uppercase tracking-wider text-gray-500">
+                            <th class="p-4 font-bold">User</th>
+                            <th class="p-4 font-bold">Department</th>
+                            <th class="p-4 font-bold">Contact</th>
+                            <th class="p-4 font-bold">Status</th>
+                            <th class="p-4 font-bold text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        {% for user in search_results %}
+                        <tr class="hover:bg-gray-50 transition-colors group">
+                            <td class="p-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="relative">
+                                        <div
+                                            class="relative w-10 h-10 rounded-full border-2 border-white shadow-sm overflow-hidden bg-gray-100">
+                                            <div class="absolute inset-0 skeleton z-0"></div>
+                                            {% if user.image.startswith('http') %}
+                                            <img src="{{ user.image }}" loading="lazy"
+                                                onload="this.classList.remove('opacity-0'); this.previousElementSibling.style.display='none';"
+                                                class="w-full h-full object-cover opacity-0 transition-opacity duration-300 relative z-10">
+                                            {% else %}
+                                            <img src="{{ url_for('static', filename='images/' + user.image) }}"
+                                                loading="lazy"
+                                                onload="this.classList.remove('opacity-0'); this.previousElementSibling.style.display='none';"
+                                                class="w-full h-full object-cover opacity-0 transition-opacity duration-300 relative z-10">
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="font-bold text-gray-800">{{ user.name }}</div>
+                                        <div class="text-xs text-gray-500">{{ user.student_id }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="p-4">
+                                <div class="text-sm font-medium text-gray-800">{{ user.department }}</div>
+                                <div class="text-xs text-gray-500">Batch {{ user.batch }}</div>
+                            </td>
+                            <td class="p-4">
+                                <div class="text-sm font-medium text-gray-800">{{ user.mobile }}</div>
+                                <div class="text-xs text-gray-500">{{ user.email }}</div>
+                            </td>
+                            <td class="p-4">
+                                {% if user.is_approved %}
+                                <span
+                                    class="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-bold">Approved</span>
+                                {% else %}
+                                <span
+                                    class="bg-orange-100 text-orange-700 px-2 py-1 rounded-full text-xs font-bold">Pending</span>
+                                {% endif %}
+                            </td>
+                            <td class="p-4 text-right">
+                                <div class="flex items-center justify-end gap-2">
+                                    <button type="button" onclick="toggleAvailability({{ user.id }}, this)"
+                                        class="p-2 rounded-lg transition-colors {{ 'bg-orange-100 text-orange-500 hover:bg-orange-200' if user.is_archived else 'bg-teal-100 text-teal-600 hover:bg-teal-200' }}"
+                                        title="{{ 'Unhide Profile' if user.is_archived else 'Hide Profile' }}">
+                                        <i class="fas {{ 'fa-eye-slash' if user.is_archived else 'fa-eye' }}"></i>
+                                    </button>
+                                    <button
+                                        onclick="openEditModal('{{ user.id }}', '{{ user.name }}', '{{ user.date_of_birth.strftime('%Y-%m-%d') if user.date_of_birth else '' }}', '{{ user.blood_group }}', '{{ user.batch }}', '{{ user.is_available|lower if user.is_available is not none else '' }}', '{{ user.email }}', '{{ user.mobile }}', '{{ user.address }}', '{{ user.department }}', '{{ user.is_approved|lower if user.is_approved is not none else '' }}')"
+                                        class="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors"
+                                        title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <a href="{{ url_for('admin_send_change_request', user_id=user.id) }}"
+                                        class="p-2 bg-purple-100 text-purple-600 rounded-lg hover:bg-purple-200 transition-colors"
+                                        title="Request Changes">
+                                        <i class="fas fa-envelope"></i>
+                                    </a>
+                                    <form action="{{ url_for('admin_delete_user', user_id=user.id) }}" method="POST"
+                                        onsubmit="confirmAction(event, this, 'Are you sure you want to delete this user? This action cannot be undone.');"
+                                        class="inline">
+                                        <button type="submit"
+                                            class="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors"
+                                            title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-12 text-gray-500">
+                <i class="fas fa-search text-4xl mb-4 opacity-30"></i>
+                <p>No users found matching "{{ search_query }}"</p>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Compact Statistics Cards (Clickable) -->
+        <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
+            <!-- Total Donors -->
+            <a href="{{ url_for('admin_filter_users', filter_type='donors') }}"
+                class="bg-gradient-to-br from-blue-600 to-indigo-700 p-4 rounded-xl shadow-lg text-white relative overflow-hidden hover:shadow-xl transition-all transform hover:-translate-y-1 cursor-pointer group">
+                <div class="relative z-10">
+                    <p class="text-blue-100 text-xs font-bold uppercase tracking-wider">Total Donors</p>
+                    <h3 class="text-2xl font-bold mt-1">{{ total_donors }}</h3>
+                </div>
+                <i class="fas fa-users absolute -right-2 -bottom-2 text-6xl opacity-20 group-hover:opacity-30 transition-opacity"></i>
+            </a>
+
+            <!-- Available Donors -->
+            <a href="{{ url_for('admin_filter_users', filter_type='available') }}"
+                class="bg-gradient-to-br from-green-600 to-emerald-700 p-4 rounded-xl shadow-lg text-white relative overflow-hidden hover:shadow-xl transition-all transform hover:-translate-y-1 cursor-pointer group">
+                <div class="relative z-10">
+                    <p class="text-green-100 text-xs font-bold uppercase tracking-wider">Available</p>
+                    <h3 class="text-2xl font-bold mt-1">{{ available_donors }}</h3>
+                </div>
+                <i class="fas fa-heartbeat absolute -right-2 -bottom-2 text-6xl opacity-20 group-hover:opacity-30 transition-opacity"></i>
+            </a>
+
+            <!-- Pending Approvals -->
+            <a href="{{ url_for('admin_filter_users', filter_type='pending') }}"
+                class="bg-gradient-to-br from-orange-600 to-red-600 p-4 rounded-xl shadow-lg text-white relative overflow-hidden hover:shadow-xl transition-all transform hover:-translate-y-1 cursor-pointer group">
+                <div class="relative z-10">
+                    <p class="text-orange-100 text-xs font-bold uppercase tracking-wider">Pending</p>
+                    <h3 class="text-2xl font-bold mt-1">{{ total_pending }}</h3>
+                </div>
+                <i class="fas fa-clock absolute -right-2 -bottom-2 text-6xl opacity-20 group-hover:opacity-30 transition-opacity"></i>
+            </a>
+
+            <!-- Total Donations -->
+            <a href="{{ url_for('admin_filter_users', filter_type='donations') }}"
+                class="bg-gradient-to-br from-purple-600 to-pink-600 p-4 rounded-xl shadow-lg text-white relative overflow-hidden hover:shadow-xl transition-all transform hover:-translate-y-1 cursor-pointer group">
+                <div class="relative z-10">
+                    <p class="text-purple-100 text-xs font-bold uppercase tracking-wider">Donations</p>
+                    <h3 class="text-2xl font-bold mt-1">{{ total_donations }}</h3>
+                </div>
+                <i class="fas fa-hand-holding-heart absolute -right-2 -bottom-2 text-6xl opacity-20 group-hover:opacity-30 transition-opacity"></i>
+            </a>
+
+            <!-- Hidden Donors -->
+            <a href="{{ url_for('admin_filter_users', filter_type='hidden') }}"
+                class="bg-gradient-to-br from-gray-500 to-gray-700 p-4 rounded-xl shadow-lg text-white relative overflow-hidden hover:shadow-xl transition-all transform hover:-translate-y-1 cursor-pointer group">
+                <div class="relative z-10">
+                    <p class="text-gray-100 text-xs font-bold uppercase tracking-wider">Hidden</p>
+                    <h3 class="text-2xl font-bold mt-1">{{ hidden_donors }}</h3>
+                </div>
+                <i class="fas fa-eye-slash absolute -right-2 -bottom-2 text-6xl opacity-20 group-hover:opacity-30 transition-opacity"></i>
+            </a>
+
+            <!-- Deleted Accounts -->
+            <a href="{{ url_for('admin_filter_users', filter_type='deleted') }}"
+                class="bg-gradient-to-br from-red-800 to-red-900 p-4 rounded-xl shadow-lg text-white relative overflow-hidden hover:shadow-xl transition-all transform hover:-translate-y-1 cursor-pointer group">
+                <div class="relative z-10">
+                    <p class="text-red-100 text-xs font-bold uppercase tracking-wider">Deleted</p>
+                    <h3 class="text-2xl font-bold mt-1">{{ deleted_accounts }}</h3>
+                </div>
+                <i class="fas fa-trash-alt absolute -right-2 -bottom-2 text-6xl opacity-20 group-hover:opacity-30 transition-opacity"></i>
+            </a>
+        </div>
+
+
+        <!-- Compact Charts Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
+            <div class="bg-white rounded-xl shadow-md p-4 border border-gray-100">
+                <h2 class="text-sm font-bold mb-2 text-gray-700 flex items-center gap-2">
+                    <i class="fas fa-chart-pie text-red-500"></i> Blood Group
+                </h2>
+                <div class="h-48 relative">
+                    <canvas id="adminBloodChart"></canvas>
+                    <div id="loader-blood" class="absolute inset-0 bg-white z-10 flex items-center justify-center">
+                        <div class="w-32 h-32 rounded-full skeleton"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-md p-4 border border-gray-100">
+                <h2 class="text-sm font-bold mb-2 text-gray-700 flex items-center gap-2">
+                    <i class="fas fa-chart-bar text-blue-500"></i> Faculty
+                </h2>
+                <div class="h-48 relative">
+                    <canvas id="adminFacultyChart"></canvas>
+                    <div id="loader-faculty" class="absolute inset-0 bg-white z-10 flex items-center justify-center">
+                        <div class="w-full h-full rounded-lg skeleton"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Blood Group Distribution Grid (Redesigned) -->
+        <!-- Blood Group Distribution Grid (Clean & Compact) -->
+        <div class="bg-white rounded-2xl shadow-md p-5 mb-8 border border-gray-100">
+            <h2 class="text-lg font-bold mb-4 text-gray-800 flex items-center gap-2">
+                <i class="fas fa-tint text-red-600"></i> Donors by Blood Group
+            </h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+                {% for blood_type in ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'] %}
+                <!-- Clickable Blood Group Card -->
+                <a href="{{ url_for('admin_filter_users', filter_type=blood_type) }}"
+                    class="relative group cursor-pointer transform hover:-translate-y-1 transition-transform duration-200">
+                    <div
+                        class="relative p-3 bg-white rounded-xl border border-gray-200 hover:border-red-400 hover:bg-red-50 transition-colors text-center shadow-sm hover:shadow-md">
+                        <div class="text-2xl font-black text-gray-800 mb-0.5">
+                            {{ blood_counts.get(blood_type, 0) }}
+                        </div>
+                        <div class="text-xs font-bold text-red-600">{{ blood_type }}</div>
+                        <div class="text-[10px] uppercase tracking-wide text-gray-400 mt-1 font-semibold">
+                            {% if blood_type == 'O-' %}Universal{% elif blood_type == 'AB+' %}Recipient{% else %}Donor{%
+                            endif %}
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Pending Approvals Section -->
+        {% if users %}
+        <!-- Pending Approvals Section -->
+        <div class="bg-white rounded-2xl shadow-xl p-6 mb-8 border border-gray-100">
+            <h2 class="text-xl font-bold mb-4 text-gray-800 flex items-center gap-2">
+                <i class="fas fa-clock text-orange-600"></i> Pending Approvals ({{ total_pending }})
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for user in users %}
+                <div
+                    class="bg-gradient-to-br from-gray-50 to-white p-8 rounded-2xl border border-gray-200 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 group">
+                    <div class="flex items-center mb-6">
+                        <div class="relative">
+                            <div
+                                class="relative w-20 h-20 rounded-full border-4 border-white shadow-lg group-hover:scale-110 transition-transform duration-300 overflow-hidden bg-gray-100">
+                                <div class="absolute inset-0 skeleton z-0"></div>
+                                {% if user.image.startswith('http') %}
+                                <img src="{{ user.image }}" alt="{{ user.name }}" loading="lazy"
+                                    onload="this.classList.remove('opacity-0'); this.previousElementSibling.style.display='none';"
+                                    class="w-full h-full object-cover opacity-0 transition-opacity duration-500 relative z-10">
+                                {% else %}
+                                <img src="{{ url_for('static', filename='images/' + user.image) }}"
+                                    alt="{{ user.name }}" loading="lazy"
+                                    onload="this.classList.remove('opacity-0'); this.previousElementSibling.style.display='none';"
+                                    class="w-full h-full object-cover opacity-0 transition-opacity duration-500 relative z-10">
+                                {% endif %}
+                            </div>
+                            <div
+                                class="absolute -bottom-1 -right-1 w-6 h-6 bg-orange-500 rounded-full border-2 border-white flex items-center justify-center">
+                                <i class="fas fa-clock text-white text-xs"></i>
+                            </div>
+                        </div>
+                        <div class="ml-4 flex-1">
+                            <h3 class="text-xl font-bold text-gray-800 group-hover:text-red-600 transition-colors">{{
+                                user.name }}</h3>
+                            <p class="text-sm text-gray-600 font-medium">{{ user.student_id }}</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3 mb-6">
+                        <div class="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
+                            <i class="fas fa-university text-blue-600"></i>
+                            <div>
+                                <p class="text-xs text-gray-500 font-medium">Department</p>
+                                <p class="font-semibold text-gray-800">{{ user.department }}</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
+                            <i class="fas fa-users text-green-600"></i>
+                            <div>
+                                <p class="text-xs text-gray-500 font-medium">Batch</p>
+                                <p class="font-semibold text-gray-800">{{ user.batch }}</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3 p-3 bg-red-50 rounded-lg">
+                            <i class="fas fa-tint text-red-600"></i>
+                            <div>
+                                <p class="text-xs text-gray-500 font-medium">Blood Group</p>
+                                <p class="font-bold text-red-600 text-lg">{{ user.blood_group }}</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3 p-3 bg-purple-50 rounded-lg">
+                            <i class="fas fa-phone text-purple-600"></i>
+                            <div>
+                                <p class="text-xs text-gray-500 font-medium">Mobile</p>
+                                <p class="font-semibold text-gray-800">{{ user.mobile }}</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3 p-3 bg-yellow-50 rounded-lg">
+                            <i class="fas fa-envelope text-yellow-600"></i>
+                            <div>
+                                <p class="text-xs text-gray-500 font-medium">Email</p>
+                                <p class="font-semibold text-gray-800">{{ user.email }}</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3 p-3 bg-indigo-50 rounded-lg">
+                            <i class="fas fa-map-marker-alt text-indigo-600"></i>
+                            <div>
+                                <p class="text-xs text-gray-500 font-medium">Address</p>
+                                <p class="font-semibold text-gray-800">{{ user.address }}</p>
+                            </div>
+                        </div>
+
+                        {% if user.date_of_birth %}
+                        <div class="flex items-center gap-3 p-3 bg-pink-50 rounded-lg">
+                            <i class="fas fa-birthday-cake text-pink-600"></i>
+                            <div>
+                                <p class="text-xs text-gray-500 font-medium">Date of Birth</p>
+                                <p class="font-semibold text-gray-800">{{ user.date_of_birth.strftime('%B %d, %Y') if
+                                    user.date_of_birth else 'Not provided' }}</p>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <div class="flex items-center gap-3 p-3 bg-teal-50 rounded-lg">
+                            <i class="fas fa-calendar-plus text-teal-600"></i>
+                            <div>
+                                <p class="text-xs text-gray-500 font-medium">Registered On</p>
+                                <p class="font-semibold text-gray-800">{{ user.created_at.strftime('%B %d, %Y at %I:%M
+                                    %p') }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-2 mb-4">
+                        <a href="{{ url_for('admin_send_change_request', user_id=user.id) }}"
+                            class="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-3 px-4 rounded-xl font-bold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center gap-2 group">
+                            <i class="fas fa-envelope group-hover:animate-bounce"></i> Request Changes
+                        </a>
+                    </div>
+                    <div class="flex gap-4">
+                        <form action="{{ url_for('approve_user', user_id=user.id) }}" method="POST" class="flex-1">
+                            <button type="submit"
+                                class="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white py-4 px-6 rounded-xl font-bold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center gap-2 group">
+                                <i class="fas fa-check group-hover:animate-bounce"></i> Approve
+                            </button>
+                        </form>
+                        <form action="{{ url_for('reject_user', user_id=user.id) }}" method="POST" class="flex-1">
+                            <button type="submit"
+                                class="w-full bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white py-4 px-6 rounded-xl font-bold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center gap-2 group">
+                                <i class="fas fa-times group-hover:animate-pulse"></i> Reject
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        <!-- Control Center (Intelligent & Compact) -->
+        <div class="bg-gray-900 rounded-2xl shadow-2xl p-6 mb-8 text-white relative overflow-hidden group">
+            <!-- Animated Background -->
+            <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
+            <div
+                class="absolute top-0 right-0 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl -mr-32 -mt-32 animate-pulse">
+            </div>
+            <div class="absolute bottom-0 left-0 w-64 h-64 bg-purple-600/20 rounded-full blur-3xl -ml-20 -mb-20 animate-pulse"
+                style="animation-delay: 1s;"></div>
+
+            <h2 class="text-lg font-bold mb-4 flex items-center gap-2 relative z-10">
+                <i class="fas fa-robot text-blue-400"></i> Intelligent Control center
+            </h2>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 relative z-10">
+                <!-- 1. Export Data -->
+                <button
+                    onclick="openConfirmModal('{{ url_for('admin_export_data') }}', 'Download full database backup?', 'download')"
+                    class="flex flex-col items-center justify-center p-3 bg-white/5 hover:bg-white/10 rounded-xl text-center transition-all border border-white/5 group hover:border-blue-500/30">
+                    <div
+                        class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center mb-2 group-hover:bg-blue-500 group-hover:text-white transition-colors">
+                        <i class="fas fa-download text-blue-400 text-sm group-hover:text-white"></i>
+                    </div>
+                    <span class="text-xs font-semibold text-gray-300 group-hover:text-white">Export DB</span>
+                </button>
+
+                <!-- 2. System Health -->
+                <button onclick="openHealthModal()"
+                    class="flex flex-col items-center justify-center p-3 bg-white/5 hover:bg-white/10 rounded-xl text-center transition-all border border-white/5 group hover:border-green-500/30">
+                    <div
+                        class="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center mb-2 group-hover:bg-green-500 group-hover:text-white transition-colors">
+                        <i class="fas fa-heartbeat text-green-400 text-sm group-hover:text-white"></i>
+                    </div>
+                    <span class="text-xs font-semibold text-gray-300 group-hover:text-white">System Health</span>
+                </button>
+
+                <!-- 3. Reject All -->
+                <form action="{{ url_for('admin_reject_all_pending') }}" method="POST" id="rejectAllForm"
+                    class="hidden"></form>
+                <button onclick="openConfirmModal(null, 'REJECT ALL pending requests? This is irreversible.', 'reject')"
+                    class="flex flex-col items-center justify-center p-3 bg-white/5 hover:bg-red-900/20 rounded-xl text-center transition-all border border-white/5 group hover:border-red-500/30">
+                    <div
+                        class="w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center mb-2 group-hover:bg-red-500 group-hover:text-white transition-colors">
+                        <i class="fas fa-trash-alt text-red-500 text-sm group-hover:text-white"></i>
+                    </div>
+                    <span class="text-xs font-semibold text-gray-300 group-hover:text-white">Reject All</span>
+                </button>
+
+                <!-- 4. Approve All -->
+                <form action="{{ url_for('admin_approve_all_pending') }}" method="POST" id="approveAllForm"
+                    class="hidden"></form>
+                <button onclick="openConfirmModal(null, 'APPROVE ALL pending requests?', 'approve')"
+                    class="flex flex-col items-center justify-center p-3 bg-white/5 hover:bg-green-900/20 rounded-xl text-center transition-all border border-white/5 group hover:border-green-500/30">
+                    <div
+                        class="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center mb-2 group-hover:bg-green-500 group-hover:text-white transition-colors">
+                        <i class="fas fa-check-double text-green-500 text-sm group-hover:text-white"></i>
+                    </div>
+                    <span class="text-xs font-semibold text-gray-300 group-hover:text-white">Approve All</span>
+                </button>
+
+                <!-- 5. Broadcast -->
+                <button onclick="openBroadcastModal()"
+                    class="flex flex-col items-center justify-center p-3 bg-white/5 hover:bg-white/10 rounded-xl text-center transition-all border border-white/5 group hover:border-yellow-500/30">
+                    <div
+                        class="w-8 h-8 rounded-full bg-yellow-500/20 flex items-center justify-center mb-2 group-hover:bg-yellow-500 group-hover:text-white transition-colors">
+                        <i class="fas fa-bullhorn text-yellow-400 text-sm group-hover:text-white"></i>
+                    </div>
+                    <span class="text-xs font-semibold text-gray-300 group-hover:text-white">Broadcast</span>
+                </button>
+
+                <!-- 6. Export Donors CSV -->
+                <button
+                    onclick="openConfirmModal('{{ url_for('admin_export_csv', filter_type='donors') }}', 'Download CSV file containing all approved donors data?', 'download')"
+                    class="flex flex-col items-center justify-center p-3 bg-white/5 hover:bg-white/10 rounded-xl text-center transition-all border border-white/5 group hover:border-emerald-500/30">
+                    <div
+                        class="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center mb-2 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
+                        <i class="fas fa-file-csv text-emerald-400 text-sm group-hover:text-white"></i>
+                    </div>
+                    <span class="text-xs font-semibold text-gray-300 group-hover:text-white">Donors CSV</span>
+                </button>
+
+                <!-- 7. Export Donations CSV -->
+                <button
+                    onclick="openConfirmModal('{{ url_for('admin_export_csv', filter_type='donations') }}', 'Download CSV file containing all donation records?', 'download')"
+                    class="flex flex-col items-center justify-center p-3 bg-white/5 hover:bg-white/10 rounded-xl text-center transition-all border border-white/5 group hover:border-purple-500/30">
+                    <div
+                        class="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center mb-2 group-hover:bg-purple-500 group-hover:text-white transition-colors">
+                        <i class="fas fa-file-export text-purple-400 text-sm group-hover:text-white"></i>
+                    </div>
+                    <span class="text-xs font-semibold text-gray-300 group-hover:text-white">Donations CSV</span>
+                </button>
+
+                <!-- 8. Donation Stats Modal -->
+                <button onclick="openDonationStatsModal()"
+                    class="flex flex-col items-center justify-center p-3 bg-white/5 hover:bg-white/10 rounded-xl text-center transition-all border border-white/5 group hover:border-pink-500/30">
+                    <div
+                        class="w-8 h-8 rounded-full bg-pink-500/20 flex items-center justify-center mb-2 group-hover:bg-pink-500 group-hover:text-white transition-colors">
+                        <i class="fas fa-chart-bar text-pink-400 text-sm group-hover:text-white"></i>
+                    </div>
+                    <span class="text-xs font-semibold text-gray-300 group-hover:text-white">Stats</span>
+                </button>
+
+                <!-- 9. Activity Log -->
+                <a href="{{ url_for('admin_activity_log') }}"
+                    class="flex flex-col items-center justify-center p-3 bg-white/5 hover:bg-white/10 rounded-xl text-center transition-all border border-white/5 group hover:border-indigo-500/30">
+                    <div
+                        class="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center mb-2 group-hover:bg-indigo-500 group-hover:text-white transition-colors">
+                        <i class="fas fa-history text-indigo-400 text-sm group-hover:text-white"></i>
+                    </div>
+                    <span class="text-xs font-semibold text-gray-300 group-hover:text-white">Activity Log</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Edit User Modal -->
+<div id="editUserModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog"
+    aria-modal="true">
+    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"
+            onclick="closeEditModal()"></div>
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+        <div
+            class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full">
+            <form id="editUserForm" method="POST">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">Edit User Details
+                            </h3>
+                            <div class="mt-4 space-y-4 max-h-96 overflow-y-auto">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Name</label>
+                                    <input type="text" name="name" id="edit_name"
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2">
+                                </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Date of Birth</label>
+                                        <input type="date" name="date_of_birth" id="edit_date_of_birth"
+                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Blood Group</label>
+                                        <select name="blood_group" id="edit_blood_group"
+                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2">
+                                            <option value="A+">A+</option>
+                                            <option value="A-">A-</option>
+                                            <option value="B+">B+</option>
+                                            <option value="B-">B-</option>
+                                            <option value="O+">O+</option>
+                                            <option value="O-">O-</option>
+                                            <option value="AB+">AB+</option>
+                                            <option value="AB-">AB-</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Batch</label>
+                                        <input type="text" name="batch" id="edit_batch"
+                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Availability</label>
+                                        <select name="is_available" id="edit_is_available"
+                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2">
+                                            <option value="true">Available for Donation</option>
+                                            <option value="false">Not Available</option>
+                                            <option value="">Not Set</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Approval Status</label>
+                                    <select name="is_approved" id="edit_is_approved"
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2">
+                                        <option value="true">Approved - Can Login</option>
+                                        <option value="false">Pending - Needs Approval</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Email</label>
+                                    <input type="email" name="email" id="edit_email"
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Mobile</label>
+                                    <input type="text" name="mobile" id="edit_mobile"
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Address</label>
+                                    <textarea name="address" id="edit_address" rows="3"
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"></textarea>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Faculty</label>
+                                    <select name="faculty" id="edit_faculty"
+                                        onchange="updateProgramOptions('edit_faculty', 'edit_program')"
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2">
+                                        <option value="">Select Faculty</option>
+                                        <option value="FST">Faculty of Science and Technology</option>
+                                        <option value="FASS">Faculty of Arts & Social Sciences</option>
+                                        <option value="FBS">Faculty of Business Studies</option>
+                                        <option value="FSSS">Faculty of Security & Strategic Studies</option>
+                                        <option value="FMS">Faculty of Medical Studies</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Program</label>
+                                    <select name="program" id="edit_program" disabled
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2 bg-gray-100">
+                                        <option value="">Select Program</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button type="submit"
+                        class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm">
+                        Save Changes
+                    </button>
+                    <button type="button" onclick="closeEditModal()"
+                        class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Custom Confirmation Modal with Animations -->
+<div id="confirmationModal" class="fixed inset-0 z-[60] hidden overflow-y-auto" aria-labelledby="modal-title"
+    role="dialog" aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 bg-gray-900/80 transition-opacity duration-300 backdrop-blur-sm"
+            onclick="closeConfirmModal()"></div>
+
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+        <div id="confirmModalContent"
+            class="relative inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all duration-300 scale-95 opacity-0 sm:my-8 sm:align-middle sm:max-w-md w-full border border-gray-100">
+            <div class="bg-gradient-to-br from-white to-gray-50 px-6 pt-6 pb-4">
+                <div class="flex flex-col items-center text-center">
+                    <!-- Animated Icon Container -->
+                    <div id="confirmIconContainer"
+                        class="flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4 animate-pulse">
+                        <i id="confirmIcon" class="fas fa-exclamation-triangle text-3xl text-red-600"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2" id="confirmTitle">Confirm Action</h3>
+                    <p class="text-sm text-gray-500 max-w-sm" id="confirmMessage">Are you sure you want to proceed?</p>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-6 py-4 flex gap-3">
+                <button type="button" onclick="closeConfirmModal()"
+                    class="flex-1 py-3 px-4 bg-gray-200 hover:bg-gray-300 rounded-xl font-bold text-gray-700 transition-all duration-200 transform hover:scale-[1.02]">
+                    <i class="fas fa-times mr-2"></i>Cancel
+                </button>
+                <button type="button" id="confirmBtn"
+                    class="flex-1 py-3 px-4 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 rounded-xl font-bold text-white shadow-lg transition-all duration-200 transform hover:scale-[1.02] hover:shadow-xl">
+                    <i class="fas fa-check mr-2"></i>Confirm
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- System Health Modal -->
+<div id="healthModal" class="fixed inset-0 z-[60] hidden overflow-y-auto" role="dialog" aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen px-4 text-center">
+        <div class="fixed inset-0 bg-gray-900 bg-opacity-80 backdrop-blur-sm" onclick="closeHealthModal()"></div>
+        <div class="relative bg-gray-800 text-white rounded-2xl shadow-2xl p-6 w-full max-w-md border border-gray-700">
+            <h3 class="text-xl font-bold mb-4 flex items-center justify-center gap-2">
+                <i class="fas fa-heartbeat text-green-400 animate-pulse"></i> System Status
+            </h3>
+            <div class="space-y-3">
+                <!-- Database Status -->
+                <div class="flex justify-between items-center p-3 bg-white/5 rounded-lg">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-database text-blue-400"></i>
+                        <span class="text-sm text-gray-300">Database</span>
+                    </div>
+                    <span class="text-xs font-bold text-green-400 bg-green-400/10 px-2 py-1 rounded">CONNECTED</span>
+                </div>
+
+                <!-- Server Time -->
+                <div class="flex justify-between items-center p-3 bg-white/5 rounded-lg">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-clock text-yellow-400"></i>
+                        <span class="text-sm text-gray-300">Server Time</span>
+                    </div>
+                    <span class="text-xs font-mono text-white" id="serverTimeDisplay">Loading...</span>
+                </div>
+
+                <!-- Total Donors -->
+                <div class="flex justify-between items-center p-3 bg-white/5 rounded-lg">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-users text-indigo-400"></i>
+                        <span class="text-sm text-gray-300">Total Donors</span>
+                    </div>
+                    <span class="text-xs font-bold text-indigo-400">{{ total_donors }}</span>
+                </div>
+
+                <!-- Pending Requests -->
+                <div class="flex justify-between items-center p-3 bg-white/5 rounded-lg">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-hourglass-half text-orange-400"></i>
+                        <span class="text-sm text-gray-300">Pending Requests</span>
+                    </div>
+                    <span class="text-xs font-bold text-orange-400">{{ total_pending }}</span>
+                </div>
+
+                <!-- Available Donors -->
+                <div class="flex justify-between items-center p-3 bg-white/5 rounded-lg">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-heart text-green-400"></i>
+                        <span class="text-sm text-gray-300">Available Donors</span>
+                    </div>
+                    <span class="text-xs font-bold text-green-400">{{ available_donors }}</span>
+                </div>
+
+                <!-- Email Server -->
+                <div class="flex justify-between items-center p-3 bg-white/5 rounded-lg">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-envelope text-pink-400"></i>
+                        <span class="text-sm text-gray-300">Email Server</span>
+                    </div>
+                    <span class="text-xs font-bold text-green-400 bg-green-400/10 px-2 py-1 rounded">ACTIVE</span>
+                </div>
+
+                <!-- Flask Version -->
+                <div class="flex justify-between items-center p-3 bg-white/5 rounded-lg">
+                    <div class="flex items-center gap-2">
+                        <i class="fab fa-python text-cyan-400"></i>
+                        <span class="text-sm text-gray-300">Flask Version</span>
+                    </div>
+                    <span class="text-xs font-mono text-cyan-300">3.x</span>
+                </div>
+            </div>
+            <button onclick="closeHealthModal()"
+                class="mt-6 w-full py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm font-bold transition-colors">
+                <i class="fas fa-times mr-2"></i>Close Monitor
+            </button>
+        </div>
+    </div>
+</div>
+
+
+<!-- Donation Stats Modal -->
+<div id="donationStatsModal" class="fixed inset-0 z-[60] hidden overflow-y-auto" role="dialog" aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen px-4 text-center">
+        <div class="fixed inset-0 bg-gray-900 bg-opacity-80 backdrop-blur-sm" onclick="closeDonationStatsModal()"></div>
+        <div
+            class="relative bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl shadow-2xl p-6 w-full max-w-2xl border border-gray-700 text-left text-white">
+            <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+                <i class="fas fa-chart-bar text-pink-500"></i> Donation Statistics
+            </h3>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                <div class="bg-white/5 rounded-lg p-3 text-center">
+                    <div class="text-2xl font-bold text-blue-400">{{ total_donations }}</div>
+                    <div class="text-xs text-gray-400">Total Donations</div>
+                </div>
+                <div class="bg-white/5 rounded-lg p-3 text-center">
+                    <div class="text-2xl font-bold text-green-400">{{ available_donors }}</div>
+                    <div class="text-xs text-gray-400">Active Donors</div>
+                </div>
+                <div class="bg-white/5 rounded-lg p-3 text-center">
+                    <div class="text-2xl font-bold text-purple-400">{{ "%.1f"|format(total_donations / (total_donors if
+                        total_donors > 0 else 1)) }}</div>
+                    <div class="text-xs text-gray-400">Avg per Donor</div>
+                </div>
+                <div class="bg-white/5 rounded-lg p-3 text-center">
+                    <div class="text-2xl font-bold text-pink-400" id="thisMonthDonations">-</div>
+                    <div class="text-xs text-gray-400">This Month</div>
+                </div>
+            </div>
+
+            <!-- Monthly Trend Chart -->
+            <div class="bg-white/5 rounded-lg p-4 mb-4">
+                <h4 class="text-sm font-bold text-gray-300 mb-3"><i class="fas fa-chart-line mr-2"></i>Monthly Donations
+                    (Last 6 Months)</h4>
+                <div style="height: 150px;">
+                    <canvas id="monthlyDonationsChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Top Donors -->
+            <div class="bg-white/5 rounded-lg p-4">
+                <h4 class="text-sm font-bold text-gray-300 mb-3"><i class="fas fa-trophy mr-2 text-yellow-400"></i>Top
+                    Donors</h4>
+                <div id="topDonorsList" class="space-y-2">
+                    <!-- Will be populated by JS -->
+                    <div class="text-sm text-gray-500 text-center py-2">Loading...</div>
+                </div>
+            </div>
+
+            <button onclick="closeDonationStatsModal()"
+                class="mt-6 w-full py-2 bg-pink-600 hover:bg-pink-500 rounded-lg text-sm font-bold transition-colors">
+                <i class="fas fa-times mr-2"></i>Close Stats
+            </button>
+        </div>
+    </div>
+</div>
+
+
+<!-- Broadcast Email Modal -->
+<div id="broadcastModal" class="fixed inset-0 z-[60] hidden overflow-y-auto" role="dialog" aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen px-4 text-center">
+        <div class="fixed inset-0 bg-gray-900 bg-opacity-80 backdrop-blur-sm" onclick="closeBroadcastModal()"></div>
+        <div
+            class="relative bg-white rounded-2xl shadow-2xl p-6 w-full max-w-xl border border-gray-200 text-left transform transition-all">
+            <h3 class="text-xl font-bold mb-4 flex items-center gap-2 text-gray-800">
+                <i class="fas fa-bullhorn text-yellow-500"></i> Broadcast Email
+            </h3>
+            <form action="{{ url_for('admin_broadcast_email') }}" method="POST" id="broadcastForm">
+                <div class="space-y-4">
+                    <!-- Base Target -->
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Base Target</label>
+                        <div class="flex gap-3">
+                            <label
+                                class="flex-1 flex items-center gap-2 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-blue-50 transition-colors">
+                                <input type="radio" name="broadcast_type" value="all" class="text-blue-600">
+                                <div>
+                                    <div class="font-semibold text-gray-800">All Donors</div>
+                                    <div class="text-xs text-gray-500">{{ total_donors }} total</div>
+                                </div>
+                            </label>
+                            <label
+                                class="flex-1 flex items-center gap-2 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-green-50 transition-colors">
+                                <input type="radio" name="broadcast_type" value="available" checked
+                                    class="text-green-600">
+                                <div>
+                                    <div class="font-semibold text-gray-800">Available Only</div>
+                                    <div class="text-xs text-gray-500">{{ available_donors }} available</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Advanced Filters -->
+                    <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                        <div class="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
+                            <i class="fas fa-filter text-blue-500"></i> Target Filters (Optional)
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <!-- Blood Group -->
+                            <div>
+                                <label class="block text-xs font-medium text-gray-600 mb-1">Blood Group</label>
+                                <select name="filter_blood_group"
+                                    class="w-full p-2 border border-gray-200 rounded-lg text-sm">
+                                    <option value="">All Blood Groups</option>
+                                    {% for bg in ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'] %}
+                                    <option value="{{ bg }}">{{ bg }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <!-- Faculty -->
+                            <div>
+                                <label class="block text-xs font-medium text-gray-600 mb-1">Faculty</label>
+                                <select name="filter_faculty"
+                                    class="w-full p-2 border border-gray-200 rounded-lg text-sm">
+                                    <option value="">All Faculties</option>
+                                    <option value="FST">FST</option>
+                                    <option value="FASS">FASS</option>
+                                    <option value="FBS">FBS</option>
+                                    <option value="FSSS">FSSS</option>
+                                    <option value="FMS">FMS</option>
+                                </select>
+                            </div>
+                            <!-- Batch -->
+                            <div>
+                                <label class="block text-xs font-medium text-gray-600 mb-1">Batch</label>
+                                <select name="filter_batch"
+                                    class="w-full p-2 border border-gray-200 rounded-lg text-sm">
+                                    <option value="">All Batches</option>
+                                    {% for year in range(2024, 2015, -1) %}
+                                    <option value="{{ year }}">{{ year }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-2"><i class="fas fa-info-circle mr-1"></i>Leave blank to
+                            include all. Filters stack together.</p>
+                    </div>
+
+                    <!-- Subject -->
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Subject *</label>
+                        <input type="text" name="subject" required
+                            class="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="e.g., Urgent Blood Needed, Event Reminder...">
+                    </div>
+                    <!-- Message -->
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Message *</label>
+                        <textarea name="message" rows="4" required
+                            class="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="Write your message here. This will be sent to all matching donors."></textarea>
+                    </div>
+                </div>
+                <div class="flex gap-3 mt-6">
+                    <button type="submit"
+                        class="flex-1 bg-gradient-to-r from-yellow-500 to-orange-500 text-white py-3 px-6 rounded-xl font-bold hover:from-yellow-600 hover:to-orange-600 transition-all shadow-lg">
+                        <i class="fas fa-paper-plane mr-2"></i>Send Broadcast
+                    </button>
+                    <button type="button" onclick="closeBroadcastModal()"
+                        class="px-6 py-3 bg-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-300 transition-colors">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // --- Custom Modal Logic with Animations ---
+    let confirmCallback = null;
+
+    function openConfirmModal(url, message, type) {
+        const modal = document.getElementById('confirmationModal');
+        const content = document.getElementById('confirmModalContent');
+        const iconContainer = document.getElementById('confirmIconContainer');
+
+        modal.classList.remove('hidden');
+
+        // Trigger animation after a small delay
+        requestAnimationFrame(() => {
+            content.classList.remove('scale-95', 'opacity-0');
+            content.classList.add('scale-100', 'opacity-100');
+        });
+
+        document.getElementById('confirmMessage').innerText = message;
+
+        const confirmBtn = document.getElementById('confirmBtn');
+        const icon = document.getElementById('confirmIcon');
+        const title = document.getElementById('confirmTitle');
+
+        // Style based on type
+        if (type === 'download') {
+            confirmBtn.className = "flex-1 py-3 px-4 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 rounded-xl font-bold text-white shadow-lg transition-all duration-200 transform hover:scale-[1.02]";
+            icon.className = "fas fa-download text-3xl text-blue-600";
+            iconContainer.className = "flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 mb-4 animate-bounce";
+            title.innerText = "Export Data";
+        } else if (type === 'approve') {
+            confirmBtn.className = "flex-1 py-3 px-4 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 rounded-xl font-bold text-white shadow-lg transition-all duration-200 transform hover:scale-[1.02]";
+            icon.className = "fas fa-check-circle text-3xl text-green-600";
+            iconContainer.className = "flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4 animate-pulse";
+            title.innerText = "Approve All";
+        } else {
+            // Default/Reject
+            confirmBtn.className = "flex-1 py-3 px-4 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 rounded-xl font-bold text-white shadow-lg transition-all duration-200 transform hover:scale-[1.02]";
+            icon.className = "fas fa-exclamation-triangle text-3xl text-red-600";
+            iconContainer.className = "flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4 animate-pulse";
+            title.innerText = "Confirm Action";
+        }
+
+        confirmBtn.onclick = function () {
+            if (url) {
+                window.location.href = url;
+            } else if (type === 'reject') {
+                document.getElementById('rejectAllForm').submit();
+            } else if (type === 'approve') {
+                document.getElementById('approveAllForm').submit();
+            }
+            closeConfirmModal();
+        };
+    }
+
+    function closeConfirmModal() {
+        const modal = document.getElementById('confirmationModal');
+        const content = document.getElementById('confirmModalContent');
+
+        // Animate out
+        content.classList.remove('scale-100', 'opacity-100');
+        content.classList.add('scale-95', 'opacity-0');
+
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 200);
+    }
+
+    function openHealthModal() {
+        document.getElementById('healthModal').classList.remove('hidden');
+    }
+
+    function closeHealthModal() {
+        document.getElementById('healthModal').classList.add('hidden');
+    }
+
+    function openBroadcastModal() {
+        document.getElementById('broadcastModal').classList.remove('hidden');
+    }
+
+    function closeBroadcastModal() {
+        document.getElementById('broadcastModal').classList.add('hidden');
+    }
+
+    // Update server time display when health modal opens
+    function updateServerTime() {
+        const now = new Date();
+        const options = {
+            weekday: 'short',
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: true
+        };
+        const timeStr = now.toLocaleString('en-US', options);
+        const el = document.getElementById('serverTimeDisplay');
+        if (el) el.textContent = timeStr;
+    }
+
+    // Override openHealthModal to update time
+    const originalOpenHealth = openHealthModal;
+    openHealthModal = function () {
+        updateServerTime();
+        document.getElementById('healthModal').classList.remove('hidden');
+    };
+
+    // --- End Custom Modal Logic ---
+
+
+    // Initialize Admin Charts
+    document.addEventListener('DOMContentLoaded', function () {
+        // Data passed from Flask
+        const bloodData = {{ blood_counts| tojson
+    }};
+    const facultyData = {{ faculty_counts| tojson }};
+
+    // 1. Blood Group Chart (Doughnut)
+    const ctxBlood = document.getElementById('adminBloodChart').getContext('2d');
+    new Chart(ctxBlood, {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys(bloodData),
+            datasets: [{
+                data: Object.values(bloodData),
+                backgroundColor: [
+                    '#ef4444', '#f87171', // A
+                    '#3b82f6', '#60a5fa', // B
+                    '#8b5cf6', '#a78bfa', // AB
+                    '#10b981', '#34d399'  // O
+                ],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'right' }
+            },
+            animation: {
+                onComplete: function () {
+                    const loader = document.getElementById('loader-blood');
+                    if (loader) loader.classList.add('hidden');
+                }
+            }
+        }
+    });
+
+    // 2. Faculty Chart (Bar)
+    const ctxFaculty = document.getElementById('adminFacultyChart').getContext('2d');
+    new Chart(ctxFaculty, {
+        type: 'bar',
+        data: {
+            labels: Object.keys(facultyData),
+            datasets: [{
+                label: 'Donors',
+                data: Object.values(facultyData),
+                backgroundColor: '#3b82f6',
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    enabled: true,
+                    callbacks: {
+                        label: function (context) {
+                            return 'Donors: ' + context.parsed.y;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { display: false },
+                    ticks: { stepSize: 1, precision: 0 }
+                },
+                x: { grid: { display: false } }
+            },
+            animation: {
+                onComplete: function () {
+                    const loader = document.getElementById('loader-faculty');
+                    if (loader) loader.classList.add('hidden');
+                }
+            }
+        }
+    });
+    });
+
+    function openEditModal(id, name, date_of_birth, blood_group, batch, is_available, email, mobile, address, department, is_approved) {
+        document.getElementById('editUserModal').classList.remove('hidden');
+        document.getElementById('editUserForm').action = '/admin/edit-user/' + id;
+
+        document.getElementById('edit_name').value = name;
+        document.getElementById('edit_date_of_birth').value = date_of_birth;
+        document.getElementById('edit_blood_group').value = blood_group;
+        document.getElementById('edit_batch').value = batch;
+        document.getElementById('edit_is_available').value = is_available === 'true' || is_available === true ? 'true' : 'false';
+        document.getElementById('edit_email').value = email === 'None' ? '' : email;
+        document.getElementById('edit_mobile').value = mobile;
+        document.getElementById('edit_address').value = address;
+        document.getElementById('edit_department').value = department;
+        document.getElementById('edit_is_approved').value = is_approved === 'true' || is_approved === true ? 'true' : 'false';
+    }
+
+    function closeEditModal() {
+        document.getElementById('editUserModal').classList.add('hidden');
+    }
+
+    // Program data for admin edit modal
+    const programsByFaculty = {
+        'FST': [
+            'BSc in Computer Science and Engineering',
+            'BSc in Information and Communication Engineering',
+            'BSc in Environmental Science',
+            'MSc in Computer Science and Engineering',
+            'MSc in Information and Communication Engineering',
+            'MSc in Information and Communication Technology',
+            'MSc in Information Systems Security',
+            'MSc in Cyber Security',
+            'MSc in Environmental Science',
+            'MSc in Environmental Science and Management',
+            'Master in Environmental Science'
+        ],
+        'FASS': [
+            'BSS in Disaster Management and Resilience',
+            'BSS in Sociology',
+            'BSS in Economics',
+            'BSS in Disaster and Human Security Management',
+            'BSS in Development Studies',
+            'BSS in Public Administration',
+            'BA in English',
+            'Bachelor of Arts (BA)',
+            'Bachelor of Social Science (BSS)',
+            'Modern Languages',
+            'MSS in Disaster Management and Resilience',
+            'MSS in Sociology',
+            'MA in Development Studies',
+            'MA in English Language Teaching and Applied Linguistics',
+            'Master of Public Administration (MPA)',
+            'MSS in Development Studies',
+            'MA in English Literature and Cultural Studies',
+            'MSS in Economics',
+            'MSS in Disaster and Human Security Management',
+            'MA in Development Studies'
+        ],
+        'FBS': [
+            'BBA in Management Studies',
+            'BBA in Marketing',
+            'BBA in Accounting and Information Systems',
+            'BBA in Finance and Banking',
+            'Bachelor of Business Administration (BBA)',
+            'MBA in Marketing',
+            'MBA in Finance and Banking',
+            'MBA in Accounting and Information Systems',
+            'MBA in Human Resource Management',
+            'Master of Business Administration (MBA)'
+        ],
+        'FSSS': [
+            'BSS in Peace, Conflict and Human Rights Studies',
+            'BSS in Mass Communication and Journalism',
+            'BSS in International Relations',
+            'Bachelor of Laws (LLB)',
+            'MSS in Mass Communication and Journalism',
+            'Master of Laws (LLM)',
+            'MSS in International Relations',
+            'Master in Peace, Conflict and Human Rights Studies',
+            'Master in Peace and Human Rights Development Studies'
+        ],
+        'FMS': [
+            'MPH in Epidemiology',
+            'Certificate in Hospital Management'
+        ]
+    };
+
+    function updateProgramOptions(facultyId, programId) {
+        const facultySelect = document.getElementById(facultyId);
+        const programSelect = document.getElementById(programId);
+        const faculty = facultySelect.value;
+
+        programSelect.innerHTML = '<option value="">Select Program</option>';
+        programSelect.disabled = !faculty;
+
+        if (faculty && programsByFaculty[faculty]) {
+            programsByFaculty[faculty].forEach(program => {
+                const option = document.createElement('option');
+                option.value = program;
+                option.textContent = program;
+                programSelect.appendChild(option);
+            });
+        }
+    }
+
+    // Broadcast Modal Logic
+    function openBroadcastModal() {
+        document.getElementById('broadcastModal').classList.remove('hidden');
+    }
+    function closeBroadcastModal() {
+        document.getElementById('broadcastModal').classList.add('hidden');
+    }
+    function sendBroadcast() {
+        // Mock functionality
+        const msg = document.getElementById('broadcastMessage').value;
+        if (msg.trim()) {
+            closeBroadcastModal();
+            // In a real app, this would send an AJAX request
+            const notification = document.createElement('div');
+            notification.className = 'fixed top-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded-full shadow-xl z-[70] animate-bounce';
+            notification.innerHTML = '<i class="fas fa-check-circle mr-2"></i> Broadcast Sent!';
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 3000);
+            document.getElementById('broadcastMessage').value = '';
+        }
+    }
+
+    async function toggleAvailability(userId, btn) {
+        const currentlyHidden = btn.title === 'Unhide Profile';
+        const result = await Swal.fire({
+            title: currentlyHidden ? 'Unhide Profile?' : 'Hide Profile?',
+            text: currentlyHidden
+                ? 'This will make the donor visible to the public again.'
+                : 'This will hide the donor from public search results.',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: currentlyHidden ? '#0d9488' : '#f97316',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: currentlyHidden ? 'Yes, unhide!' : 'Yes, hide!'
+        });
+        
+        if (!result.isConfirmed) return;
+        
+        btn.disabled = true;
+        const icon = btn.querySelector('i');
+        const originalClass = icon.className;
+        icon.className = 'fas fa-spinner fa-spin';
+
+        try {
+            const response = await fetch(`/admin/quick-toggle-availability/${userId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                if (data.is_archived) {
+                    // Profile is now hidden/archived
+                    btn.className = 'p-2 rounded-lg transition-colors bg-orange-100 text-orange-500 hover:bg-orange-200';
+                    btn.title = 'Unhide Profile';
+                    icon.className = 'fas fa-eye-slash';
+                } else {
+                    // Profile is now visible
+                    btn.className = 'p-2 rounded-lg transition-colors bg-teal-100 text-teal-600 hover:bg-teal-200';
+                    btn.title = 'Hide Profile';
+                    icon.className = 'fas fa-eye';
+                }
+                const notification = document.createElement('div');
+                notification.className = 'fixed top-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded-full shadow-xl z-[70] animate-bounce';
+                notification.innerHTML = `<i class="fas fa-check-circle mr-2"></i> ${data.message}`;
+                document.body.appendChild(notification);
+                setTimeout(() => notification.remove(), 3000);
+            } else {
+                alert(data.error || 'Failed to toggle availability');
+                icon.className = originalClass;
+            }
+        } catch (e) {
+            console.error(e);
+            alert('An error occurred. Please try again.');
+            icon.className = originalClass;
+        } finally {
+            btn.disabled = false;
+        }
+    }
+</script>
+
+<!-- Broadcast Modal -->
+<div id="broadcastModal" class="fixed inset-0 z-[60] hidden overflow-y-auto" role="dialog" aria-modal="true">
+    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 bg-gray-900 bg-opacity-80 transition-opacity" onclick="closeBroadcastModal()"></div>
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+        <div
+            class="inline-block align-bottom bg-gray-800 rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full border border-gray-700">
+            <div class="p-6">
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="w-12 h-12 rounded-full bg-yellow-500/20 flex items-center justify-center">
+                        <i class="fas fa-bullhorn text-yellow-400 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white">Broadcast Message</h3>
+                </div>
+                <p class="text-gray-400 text-sm mb-4">Send a system-wide notification to all active users.</p>
+                <textarea id="broadcastMessage" rows="4"
+                    class="w-full bg-gray-900 border border-gray-700 rounded-xl p-4 text-white placeholder-gray-500 focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                    placeholder="Type your announcement here..."></textarea>
+            </div>
+            <div class="bg-gray-900/50 px-6 py-4 flex flex-row-reverse gap-3">
+                <button onclick="sendBroadcast()"
+                    class="bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-6 rounded-xl transition-colors">
+                    Send Broadcast
+                </button>
+                <button onclick="closeBroadcastModal()"
+                    class="bg-transparent hover:bg-gray-700 text-gray-300 font-semibold py-2 px-6 rounded-xl border border-gray-600 transition-colors">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let donationStatsChart = null;
+
+    async function openDonationStatsModal() {
+        document.getElementById('donationStatsModal').classList.remove('hidden');
+
+        try {
+            const response = await fetch('/admin/donation-stats');
+            const data = await response.json();
+
+            // Update this month count
+            document.getElementById('thisMonthDonations').textContent = data.this_month;
+
+            // Render monthly chart
+            const ctx = document.getElementById('monthlyDonationsChart').getContext('2d');
+
+            // Destroy existing chart if any
+            if (donationStatsChart) {
+                donationStatsChart.destroy();
+            }
+
+            donationStatsChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.monthly_data.map(d => d.month),
+                    datasets: [{
+                        label: 'Donations',
+                        data: data.monthly_data.map(d => d.count),
+                        borderColor: '#ec4899',
+                        backgroundColor: 'rgba(236, 72, 153, 0.2)',
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 5,
+                        pointBackgroundColor: '#ec4899'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, ticks: { color: '#9ca3af', precision: 0 }, grid: { color: 'rgba(255,255,255,0.1)' } },
+                        x: { ticks: { color: '#9ca3af' }, grid: { display: false } }
+                    }
+                }
+            });
+
+            // Render top donors
+            const topDonorsList = document.getElementById('topDonorsList');
+            if (data.top_donors.length > 0) {
+                topDonorsList.innerHTML = data.top_donors.map((d, i) => `
+                    <div class="flex items-center justify-between p-2 bg-white/5 rounded-lg">
+                        <div class="flex items-center gap-3">
+                            <span class="w-6 h-6 rounded-full bg-${i === 0 ? 'yellow' : i === 1 ? 'gray' : 'orange'}-500/30 flex items-center justify-center text-xs font-bold text-${i === 0 ? 'yellow' : i === 1 ? 'gray' : 'orange'}-400">${i + 1}</span>
+                            <div>
+                                <div class="text-sm font-medium">${d.name}</div>
+                                <div class="text-xs text-gray-500">${d.blood_group}</div>
+                            </div>
+                        </div>
+                        <span class="text-sm font-bold text-pink-400">${d.count} donations</span>
+                    </div>
+                `).join('');
+            } else {
+                topDonorsList.innerHTML = '<div class="text-sm text-gray-500 text-center py-2">No donations yet</div>';
+            }
+
+        } catch (e) {
+            console.error('Failed to load donation stats:', e);
+        }
+    }
+
+    function closeDonationStatsModal() {
+        document.getElementById('donationStatsModal').classList.add('hidden');
+    }
+</script>
+
+<style>
+    @keyframes fade-in {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .animate-fade-in {
+        animation: fade-in 0.8s ease-out forwards;
+    }
+</style>
+{% endblock %}

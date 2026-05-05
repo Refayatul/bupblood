@@ -1,0 +1,323 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="py-6 bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100 min-h-screen">
+    <div class="container mx-auto px-4 max-w-3xl">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h1 class="text-2xl font-black text-gray-800 flex items-center gap-3">
+                    <i class="fas fa-user-edit text-blue-600"></i>
+                    Edit User
+                </h1>
+                <p class="text-gray-500 text-sm mt-1">Editing: {{ user.name }} ({{ user.student_id }})</p>
+            </div>
+            <a href="{{ url_for('admin_filter_users', filter_type='donors') }}"
+                class="flex items-center gap-2 bg-white hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-xl shadow-sm border border-gray-200 transition-colors font-medium text-sm">
+                <i class="fas fa-arrow-left"></i> Back to List
+            </a>
+        </div>
+
+        <!-- User Info Card -->
+        <div class="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
+            <!-- User Avatar & Quick Info -->
+            <div class="flex items-center gap-4 pb-6 border-b border-gray-100 mb-6">
+                <div
+                    class="relative w-20 h-20 rounded-full border-4 border-white shadow-lg overflow-hidden bg-gray-100">
+                    {% if user.image and user.image.startswith('http') %}
+                    <img src="{{ user.image }}" class="w-full h-full object-cover">
+                    {% else %}
+                    <div
+                        class="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-500 to-indigo-600 text-white text-2xl font-bold">
+                        {{ user.name[0] if user.name else '?' }}
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="flex-1">
+                    <h2 class="text-xl font-bold text-gray-800">{{ user.name }}</h2>
+                    <p class="text-gray-500">{{ user.student_id }}</p>
+                    <div class="flex flex-wrap gap-2 mt-2">
+                        <span class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-bold">{{
+                            user.blood_group }}</span>
+                        {% if user.is_approved %}
+                        <span class="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-bold">
+                            <i class="fas fa-check-circle mr-1"></i>Approved
+                        </span>
+                        {% else %}
+                        <span class="bg-orange-100 text-orange-700 px-2 py-1 rounded-full text-xs font-bold">
+                            <i class="fas fa-clock mr-1"></i>Pending
+                        </span>
+                        {% endif %}
+                        {% if user.is_available %}
+                        <span class="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs font-bold">
+                            <i class="fas fa-hand-holding-heart mr-1"></i>Available
+                        </span>
+                        {% else %}
+                        <span class="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs font-bold">
+                            <i class="fas fa-pause-circle mr-1"></i>Unavailable
+                        </span>
+                        {% endif %}
+                    </div>
+                    <!-- Registration & Activity Info -->
+                    <div class="mt-3 flex flex-wrap gap-4 text-xs text-gray-500">
+                        <span class="flex items-center gap-1">
+                            <i class="fas fa-calendar-plus text-green-500"></i>
+                            <strong>Registered:</strong>
+                            {% if user.created_at %}
+                            {{ user.created_at.strftime('%d %b %Y, %I:%M %p') }}
+                            {% else %}
+                            N/A
+                            {% endif %}
+                        </span>
+                        {% if user.last_availability_update %}
+                        <span class="flex items-center gap-1">
+                            <i class="fas fa-sync text-blue-500"></i>
+                            <strong>Status Changed:</strong>
+                            {{ user.last_availability_update.strftime('%d %b %Y, %I:%M %p') }}
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Edit Form -->
+            <form method="POST" class="space-y-6">
+                <!-- Basic Info Section -->
+                <div>
+                    <h3 class="text-sm font-bold text-gray-600 uppercase tracking-wide mb-4 flex items-center gap-2">
+                        <i class="fas fa-user text-blue-500"></i> Basic Information
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
+                            <input type="text" name="name" value="{{ user.name }}" required
+                                class="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Student ID *</label>
+                            <input type="text" name="student_id" value="{{ user.student_id }}" required
+                                class="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                            <input type="email" name="email" value="{{ user.email }}"
+                                class="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Mobile</label>
+                            <input type="text" name="mobile" value="{{ user.mobile }}"
+                                class="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Blood & Academic Info -->
+                <div>
+                    <h3 class="text-sm font-bold text-gray-600 uppercase tracking-wide mb-4 flex items-center gap-2">
+                        <i class="fas fa-tint text-red-500"></i> Blood & Academic Info
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Blood Group *</label>
+                            <select name="blood_group" required
+                                class="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                {% for bg in blood_groups %}
+                                <option value="{{ bg }}" {{ 'selected' if user.blood_group==bg else '' }}>{{ bg }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Batch</label>
+                            <input type="text" name="batch" value="{{ user.batch or '' }}"
+                                class="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Faculty</label>
+                            <select name="faculty" id="editFacultySelect"
+                                class="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="">Select Faculty</option>
+                                <option value="FST">FST - Faculty of Science & Technology</option>
+                                <option value="FASS">FASS - Faculty of Arts & Social Sciences</option>
+                                <option value="FBS">FBS - Faculty of Business Studies</option>
+                                <option value="FSSS">FSSS - Faculty of Security & Strategic Studies</option>
+                                <option value="FMS">FMS - Faculty of Medical Sciences</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Program</label>
+                            <select name="department" id="editProgramSelect"
+                                class="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="">Select Faculty First</option>
+                            </select>
+                            <input type="hidden" id="currentDepartment" value="{{ user.department or '' }}">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Info -->
+                <div>
+                    <h3 class="text-sm font-bold text-gray-600 uppercase tracking-wide mb-4 flex items-center gap-2">
+                        <i class="fas fa-info-circle text-indigo-500"></i> Additional Information
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
+                            <input type="date" name="date_of_birth" value="{{ user.date_of_birth or '' }}"
+                                class="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                            <input type="text" name="address" value="{{ user.address or '' }}"
+                                class="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status Toggles -->
+                <div>
+                    <h3 class="text-sm font-bold text-gray-600 uppercase tracking-wide mb-4 flex items-center gap-2">
+                        <i class="fas fa-toggle-on text-green-500"></i> Status Settings
+                    </h3>
+                    <div class="flex flex-wrap gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Approval Status</label>
+                            <select name="is_approved"
+                                class="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="true" {{ 'selected' if user.is_approved else '' }}>Approved - Can Login</option>
+                                <option value="false" {{ 'selected' if not user.is_approved else '' }}>Pending - Needs Approval</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Availability Status</label>
+                            <select name="is_available"
+                                class="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="true" {{ 'selected' if user.is_available else '' }}>Available for Donation</option>
+                                <option value="false" {{ 'selected' if not user.is_available else '' }}>Not Available</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Buttons -->
+                <div class="flex gap-3 pt-6 border-t border-gray-100">
+                    <button type="submit"
+                        class="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-6 rounded-xl font-bold hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl">
+                        <i class="fas fa-save mr-2"></i>Save Changes
+                    </button>
+                    <a href="{{ url_for('admin_filter_users', filter_type='donors') }}"
+                        class="px-6 py-3 bg-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-300 transition-colors">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Danger Zone -->
+        <div class="mt-6 bg-red-50 rounded-xl p-4 border border-red-200">
+            <h3 class="text-sm font-bold text-red-700 mb-3 flex items-center gap-2">
+                <i class="fas fa-exclamation-triangle"></i> Danger Zone
+            </h3>
+            <form action="{{ url_for('admin_delete_user', user_id=user.id) }}" method="POST"
+                onsubmit="confirmAction(event, this, 'Are you sure you want to PERMANENTLY DELETE this user? This action cannot be undone!');">
+                <button type="submit"
+                    class="px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors text-sm">
+                    <i class="fas fa-trash mr-2"></i>Delete User Permanently
+                </button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<script>
+    // Programs by Faculty
+    const programsByFaculty = {
+        'FST': [
+            'BSc in Computer Science and Engineering',
+            'BSc in Information and Communication Technology',
+            'BSc in Electrical and Electronic Engineering',
+            'MSc in Computer Science',
+            'MSc in Information and Communication Technology'
+        ],
+        'FASS': [
+            'BA in English',
+            'BA in Development Studies',
+            'MA in English',
+            'MA in Development Studies',
+            'MA in Governance and Public Policy'
+        ],
+        'FBS': [
+            'BBA in Marketing',
+            'BBA in Accounting and Information Systems',
+            'BBA in Finance and Banking',
+            'Bachelor of Business Administration (BBA)',
+            'MBA in Marketing',
+            'MBA in Finance and Banking',
+            'MBA in Accounting and Information Systems',
+            'MBA in Human Resource Management',
+            'Master of Business Administration (MBA)'
+        ],
+        'FSSS': [
+            'BSS in Peace, Conflict and Human Rights Studies',
+            'BSS in Mass Communication and Journalism',
+            'BSS in International Relations',
+            'Bachelor of Laws (LLB)',
+            'MSS in Mass Communication and Journalism',
+            'Master of Laws (LLM)',
+            'MSS in International Relations',
+            'Master in Peace, Conflict and Human Rights Studies'
+        ],
+        'FMS': [
+            'MPH in Epidemiology',
+            'Certificate in Hospital Management'
+        ]
+    };
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const facultySelect = document.getElementById('editFacultySelect');
+        const programSelect = document.getElementById('editProgramSelect');
+        const currentDepartment = document.getElementById('currentDepartment').value;
+
+        // Find which faculty the current department belongs to
+        function findFacultyForProgram(program) {
+            for (const [faculty, programs] of Object.entries(programsByFaculty)) {
+                if (programs.includes(program)) {
+                    return faculty;
+                }
+            }
+            return '';
+        }
+
+        function updatePrograms(selectCurrent = false) {
+            const faculty = facultySelect.value;
+            programSelect.innerHTML = '<option value="">Select Program</option>';
+
+            if (faculty && programsByFaculty[faculty]) {
+                programsByFaculty[faculty].forEach(program => {
+                    const option = document.createElement('option');
+                    option.value = program;
+                    option.textContent = program;
+                    if (selectCurrent && program === currentDepartment) {
+                        option.selected = true;
+                    }
+                    programSelect.appendChild(option);
+                });
+            }
+        }
+
+        // Initialize: find and select current faculty/program
+        if (currentDepartment) {
+            const currentFaculty = findFacultyForProgram(currentDepartment);
+            if (currentFaculty) {
+                facultySelect.value = currentFaculty;
+                updatePrograms(true);
+            }
+        }
+
+        // Update programs when faculty changes
+        facultySelect.addEventListener('change', () => updatePrograms(false));
+    });
+</script>
+{% endblock %}

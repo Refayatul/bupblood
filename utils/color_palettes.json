@@ -1,0 +1,12 @@
+{
+    "default": {
+        "background": "white",
+        "text": "gray-800",
+        "primary": "green-600",
+        "secondary": "red-600",
+        "accent": "green-500",
+        "button-hover": "green-700",
+        "danger": "red-500",
+        "danger-hover": "red-700"
+    }
+}

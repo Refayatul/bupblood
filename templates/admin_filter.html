@@ -1,0 +1,760 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="py-4 bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100 min-h-screen">
+    <div class="container mx-auto px-4">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6 animate-fade-in">
+            <div>
+                <h1 class="text-2xl font-black text-gray-800 tracking-tight flex items-center gap-2">
+                    <i class="fas {{ filter_icon }} text-{{ filter_color }}-600"></i>
+                    {{ filter_title }}
+                    <span class="text-sm font-normal text-gray-500 bg-gray-100 px-3 py-1 rounded-full ml-2">
+                        {{ items.total }} total
+                    </span>
+                </h1>
+            </div>
+            <a href="{{ url_for('admin_panel') }}"
+                class="flex items-center gap-2 bg-white hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-xl shadow-sm border border-gray-200 transition-colors font-medium text-sm">
+                <i class="fas fa-arrow-left"></i> Back to Admin Panel
+            </a>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="bg-white rounded-xl shadow-sm p-4 mb-4 border border-gray-100">
+            <form method="GET" class="flex flex-col md:flex-row gap-3">
+                <input type="hidden" name="sort_by" value="{{ sort_by }}">
+                <input type="hidden" name="sort_order" value="{{ sort_order }}">
+                <div class="flex-1 relative">
+                    <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    <input type="text" name="q" value="{{ search_query }}"
+                        placeholder="Search by name, student ID, or email..."
+                        class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+                <button type="submit"
+                    class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                    <i class="fas fa-search mr-2"></i>Search
+                </button>
+                {% if search_query %}
+                <a href="{{ url_for('admin_filter_users', filter_type=filter_type, sort_by=sort_by, sort_order=sort_order) }}"
+                    class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium">
+                    <i class="fas fa-times mr-1"></i>Clear
+                </a>
+                {% endif %}
+                <a href="{{ url_for('admin_export_csv', filter_type=filter_type, q=search_query, blood_group=request.args.get('blood_group', ''), department=request.args.get('department', ''), batch=request.args.get('batch', ''), status=request.args.get('status', ''), faculty=request.args.get('faculty', '')) }}"
+                    class="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all font-medium shadow-md hover:shadow-lg flex items-center gap-2">
+                    <i class="fas fa-file-csv"></i>Export CSV
+                </a>
+            </form>
+        </div>
+
+        <!-- Quick Stats (Clickable) -->
+        <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 mb-4">
+            <a href="{{ url_for('admin_filter_users', filter_type='donors') }}"
+                class="bg-gradient-to-br from-blue-600 to-indigo-700 p-3 rounded-xl shadow-lg text-white relative overflow-hidden hover:shadow-xl transition-all transform hover:-translate-y-0.5 {{ 'ring-4 ring-blue-300' if filter_type == 'donors' else '' }}">
+                <div class="relative z-10">
+                    <p class="text-blue-100 text-xs font-bold uppercase tracking-wider">Total Donors</p>
+                    <h3 class="text-xl font-bold mt-1">{{ total_donors }}</h3>
+                </div>
+                <i class="fas fa-users absolute -right-2 -bottom-2 text-5xl opacity-20"></i>
+            </a>
+
+            <a href="{{ url_for('admin_filter_users', filter_type='available') }}"
+                class="bg-gradient-to-br from-green-600 to-emerald-700 p-3 rounded-xl shadow-lg text-white relative overflow-hidden hover:shadow-xl transition-all transform hover:-translate-y-0.5 {{ 'ring-4 ring-green-300' if filter_type == 'available' else '' }}">
+                <div class="relative z-10">
+                    <p class="text-green-100 text-xs font-bold uppercase tracking-wider">Available</p>
+                    <h3 class="text-xl font-bold mt-1">{{ available_donors }}</h3>
+                </div>
+                <i class="fas fa-heartbeat absolute -right-2 -bottom-2 text-5xl opacity-20"></i>
+            </a>
+
+            <a href="{{ url_for('admin_filter_users', filter_type='pending') }}"
+                class="bg-gradient-to-br from-orange-600 to-red-600 p-3 rounded-xl shadow-lg text-white relative overflow-hidden hover:shadow-xl transition-all transform hover:-translate-y-0.5 {{ 'ring-4 ring-orange-300' if filter_type == 'pending' else '' }}">
+                <div class="relative z-10">
+                    <p class="text-orange-100 text-xs font-bold uppercase tracking-wider">Pending</p>
+                    <h3 class="text-xl font-bold mt-1">{{ total_pending }}</h3>
+                </div>
+                <i class="fas fa-clock absolute -right-2 -bottom-2 text-5xl opacity-20"></i>
+            </a>
+
+            <a href="{{ url_for('admin_filter_users', filter_type='donations') }}"
+                class="bg-gradient-to-br from-purple-600 to-pink-600 p-3 rounded-xl shadow-lg text-white relative overflow-hidden hover:shadow-xl transition-all transform hover:-translate-y-0.5 {{ 'ring-4 ring-purple-300' if filter_type == 'donations' else '' }}">
+                <div class="relative z-10">
+                    <p class="text-purple-100 text-xs font-bold uppercase tracking-wider">Donations</p>
+                    <h3 class="text-xl font-bold mt-1">{{ total_donations }}</h3>
+                </div>
+                <i class="fas fa-hand-holding-heart absolute -right-2 -bottom-2 text-5xl opacity-20"></i>
+            </a>
+            
+            <a href="{{ url_for('admin_filter_users', filter_type='hidden') }}"
+                class="bg-gradient-to-br from-gray-500 to-gray-700 p-3 rounded-xl shadow-lg text-white relative overflow-hidden hover:shadow-xl transition-all transform hover:-translate-y-0.5 {{ 'ring-4 ring-gray-300' if filter_type == 'hidden' else '' }}">
+                <div class="relative z-10">
+                    <p class="text-gray-100 text-xs font-bold uppercase tracking-wider">Hidden</p>
+                    <h3 class="text-xl font-bold mt-1">{{ hidden_donors }}</h3>
+                </div>
+                <i class="fas fa-eye-slash absolute -right-2 -bottom-2 text-5xl opacity-20"></i>
+            </a>
+
+            <a href="{{ url_for('admin_filter_users', filter_type='deleted') }}"
+                class="bg-gradient-to-br from-red-700 to-red-900 p-3 rounded-xl shadow-lg text-white relative overflow-hidden hover:shadow-xl transition-all transform hover:-translate-y-0.5 {{ 'ring-4 ring-red-400' if filter_type == 'deleted' else '' }}">
+                <div class="relative z-10">
+                    <p class="text-red-100 text-xs font-bold uppercase tracking-wider">Deleted</p>
+                    <h3 class="text-xl font-bold mt-1">{{ deleted_accounts }}</h3>
+                </div>
+                <i class="fas fa-trash-alt absolute -right-2 -bottom-2 text-5xl opacity-20"></i>
+            </a>
+        </div>
+
+        <!-- Filter Options Section -->
+        <div class="bg-white rounded-xl shadow-sm p-4 mb-4 border border-gray-100">
+            <form method="GET" class="space-y-4">
+                <input type="hidden" name="sort_by" value="{{ sort_by }}">
+                <input type="hidden" name="sort_order" value="{{ sort_order }}">
+                <input type="hidden" name="q" value="{{ search_query }}">
+
+                <div class="grid grid-cols-2 md:grid-cols-6 gap-4">
+                    <!-- Blood Group Filter -->
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 mb-2 uppercase tracking-wide">
+                            <i class="fas fa-tint text-red-500 mr-1"></i>Blood Group
+                        </label>
+                        <select name="blood_group"
+                            class="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
+                            <option value="">All Blood</option>
+                            {% for bg in ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'] %}
+                            <option value="{{ bg }}" {{ 'selected' if request.args.get('blood_group')==bg else '' }}>
+                                {{ bg }} ({{ blood_counts.get(bg, 0) }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Faculty Filter -->
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 mb-2 uppercase tracking-wide">
+                            <i class="fas fa-university text-blue-500 mr-1"></i>Faculty
+                        </label>
+                        <select name="faculty" id="facultyFilterSelect"
+                            class="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
+                            <option value="">All Faculties</option>
+                            <option value="FST" {{ 'selected' if request.args.get('faculty')=='FST' else '' }}>FST
+                            </option>
+                            <option value="FASS" {{ 'selected' if request.args.get('faculty')=='FASS' else '' }}>FASS
+                            </option>
+                            <option value="FBS" {{ 'selected' if request.args.get('faculty')=='FBS' else '' }}>FBS
+                            </option>
+                            <option value="FSSS" {{ 'selected' if request.args.get('faculty')=='FSSS' else '' }}>FSSS
+                            </option>
+                            <option value="FMS" {{ 'selected' if request.args.get('faculty')=='FMS' else '' }}>FMS
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- Program Filter (populated by Faculty) -->
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 mb-2 uppercase tracking-wide">
+                            <i class="fas fa-graduation-cap text-indigo-500 mr-1"></i>Program
+                        </label>
+                        <select name="department" id="programFilterSelect"
+                            class="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
+                            <option value="">All Programs</option>
+                        </select>
+                    </div>
+
+                    <!-- Batch Filter -->
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 mb-2 uppercase tracking-wide">
+                            <i class="fas fa-calendar text-green-500 mr-1"></i>Batch
+                        </label>
+                        <select name="batch"
+                            class="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
+                            <option value="">All Batches</option>
+                            {% if batches %}
+                            {% for batch_year, count in batches %}
+                            <option value="{{ batch_year }}" {{ 'selected' if
+                                request.args.get('batch')==batch_year|string else '' }}>
+                                {{ batch_year }} ({{ count }})
+                            </option>
+                            {% endfor %}
+                            {% endif %}
+                        </select>
+                    </div>
+
+                    <!-- Status Filter -->
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 mb-2 uppercase tracking-wide">
+                            <i class="fas fa-toggle-on text-purple-500 mr-1"></i>Status
+                        </label>
+                        <select name="status"
+                            class="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
+                            <option value="">All Status</option>
+                            <option value="available" {{ 'selected' if request.args.get('status')=='available' else ''
+                                }}>Available</option>
+                            <option value="unavailable" {{ 'selected' if request.args.get('status')=='unavailable'
+                                else '' }}>Unavailable</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Advanced Filters Row -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-3 border-t border-gray-100 mt-2">
+                    <!-- Multi-Select Blood Groups -->
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-bold text-gray-600 mb-2 uppercase tracking-wide">
+                            <i class="fas fa-tint text-red-500 mr-1"></i>Blood Groups (Multi)
+                        </label>
+                        <div class="flex flex-wrap gap-1">
+                            {% for bg in ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'] %}
+                            <label
+                                class="inline-flex items-center px-2 py-1 rounded-lg border cursor-pointer transition-all text-xs
+                                {% if bg in request.args.getlist('blood_groups') %}bg-red-100 border-red-400 text-red-700{% else %}bg-gray-50 border-gray-200 hover:bg-red-50{% endif %}">
+                                <input type="checkbox" name="blood_groups" value="{{ bg }}" {{ 'checked' if bg in
+                                    request.args.getlist('blood_groups') else '' }} class="sr-only">
+                                <span class="font-bold">{{ bg }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Date From -->
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 mb-2 uppercase tracking-wide">
+                            <i class="fas fa-calendar-plus text-teal-500 mr-1"></i>Registered From
+                        </label>
+                        <input type="date" name="date_from" value="{{ request.args.get('date_from', '') }}"
+                            class="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
+                    </div>
+
+                    <!-- Date To -->
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 mb-2 uppercase tracking-wide">
+                            <i class="fas fa-calendar-minus text-teal-500 mr-1"></i>Registered To
+                        </label>
+                        <input type="date" name="date_to" value="{{ request.args.get('date_to', '') }}"
+                            class="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
+                    </div>
+                </div>
+
+                <div class="flex gap-2 pt-3">
+
+                    <button type="submit"
+                        class="w-full px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all font-bold shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+                        <i class="fas fa-filter mr-2"></i>Filter
+                    </button>
+                </div>
+        </div>
+
+        <!-- Active Filters Display -->
+        {% set active_filters = [] %}
+        {% if request.args.get('blood_group') %}{% set _ = active_filters.append('Blood: ' +
+        request.args.get('blood_group')) %}{% endif %}
+        {% if request.args.get('faculty') %}{% set _ = active_filters.append('Faculty: ' +
+        request.args.get('faculty')) %}{% endif %}
+        {% if request.args.get('department') %}{% set _ = active_filters.append('Program: ' +
+        request.args.get('department')) %}{% endif %}
+        {% if request.args.get('batch') %}{% set _ = active_filters.append('Batch: ' +
+        request.args.get('batch')) %}{% endif %}
+        {% if request.args.get('status') %}{% set _ = active_filters.append('Status: ' +
+        request.args.get('status')) %}{% endif %}
+
+        {% if active_filters %}
+        <div class="flex items-center gap-2 pt-2 border-t border-gray-100">
+            <span class="text-xs font-medium text-gray-500">Active:</span>
+            {% for filter_label in active_filters %}
+            <span class="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs font-medium">{{ filter_label
+                }}</span>
+            {% endfor %}
+            <a href="{{ url_for('admin_filter_users', filter_type=filter_type, sort_by=sort_by, sort_order=sort_order, q=search_query) }}"
+                class="ml-auto px-3 py-1.5 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-bold rounded-full hover:from-red-600 hover:to-pink-600 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 flex items-center gap-1.5">
+                <i class="fas fa-times-circle"></i> Clear All
+            </a>
+        </div>
+        {% endif %}
+        </form>
+    </div>
+
+
+    <!-- Results Table -->
+    <div class="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
+        {% if items.items %}
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-gray-50 border-b border-gray-200 text-xs uppercase tracking-wider text-gray-500">
+                        {% if is_donations %}
+                        <th class="p-4 font-bold">
+                            <a href="{{ url_for('admin_filter_users', filter_type=filter_type, sort_by='name', sort_order='desc' if sort_by == 'name' and sort_order == 'asc' else 'asc', q=search_query) }}"
+                                class="flex items-center gap-1 hover:text-blue-600 transition-colors">
+                                Donor
+                                {% if sort_by == 'name' %}
+                                <i class="fas fa-sort-{{ 'up' if sort_order == 'asc' else 'down' }} text-blue-600"></i>
+                                {% else %}
+                                <i class="fas fa-sort text-gray-300"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th class="p-4 font-bold">
+                            <a href="{{ url_for('admin_filter_users', filter_type=filter_type, sort_by='blood_group', sort_order='desc' if sort_by == 'blood_group' and sort_order == 'asc' else 'asc', q=search_query) }}"
+                                class="flex items-center gap-1 hover:text-blue-600 transition-colors">
+                                Blood Group
+                                {% if sort_by == 'blood_group' %}
+                                <i class="fas fa-sort-{{ 'up' if sort_order == 'asc' else 'down' }} text-blue-600"></i>
+                                {% else %}
+                                <i class="fas fa-sort text-gray-300"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th class="p-4 font-bold">Department</th>
+                        <th class="p-4 font-bold">
+                            <a href="{{ url_for('admin_filter_users', filter_type=filter_type, sort_by='donation_date', sort_order='desc' if sort_by == 'donation_date' and sort_order == 'asc' else 'asc', q=search_query) }}"
+                                class="flex items-center gap-1 hover:text-blue-600 transition-colors">
+                                Donation Date
+                                {% if sort_by == 'donation_date' %}
+                                <i class="fas fa-sort-{{ 'up' if sort_order == 'asc' else 'down' }} text-blue-600"></i>
+                                {% else %}
+                                <i class="fas fa-sort text-gray-300"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th class="p-4 font-bold">Location</th>
+                        <th class="p-4 font-bold">Notes</th>
+                        {% else %}
+                        <th class="p-4 font-bold">
+                            <a href="{{ url_for('admin_filter_users', filter_type=filter_type, sort_by='name', sort_order='desc' if sort_by == 'name' and sort_order == 'asc' else 'asc', q=search_query) }}"
+                                class="flex items-center gap-1 hover:text-blue-600 transition-colors">
+                                User
+                                {% if sort_by == 'name' %}
+                                <i class="fas fa-sort-{{ 'up' if sort_order == 'asc' else 'down' }} text-blue-600"></i>
+                                {% else %}
+                                <i class="fas fa-sort text-gray-300"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th class="p-4 font-bold">
+                            <a href="{{ url_for('admin_filter_users', filter_type=filter_type, sort_by='department', sort_order='desc' if sort_by == 'department' and sort_order == 'asc' else 'asc', q=search_query) }}"
+                                class="flex items-center gap-1 hover:text-blue-600 transition-colors">
+                                Department
+                                {% if sort_by == 'department' %}
+                                <i class="fas fa-sort-{{ 'up' if sort_order == 'asc' else 'down' }} text-blue-600"></i>
+                                {% else %}
+                                <i class="fas fa-sort text-gray-300"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th class="p-4 font-bold">Contact</th>
+                        <th class="p-4 font-bold">
+                            <a href="{{ url_for('admin_filter_users', filter_type=filter_type, sort_by='blood_group', sort_order='desc' if sort_by == 'blood_group' and sort_order == 'asc' else 'asc', q=search_query) }}"
+                                class="flex items-center gap-1 hover:text-blue-600 transition-colors">
+                                Blood
+                                {% if sort_by == 'blood_group' %}
+                                <i class="fas fa-sort-{{ 'up' if sort_order == 'asc' else 'down' }} text-blue-600"></i>
+                                {% else %}
+                                <i class="fas fa-sort text-gray-300"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th class="p-4 font-bold">Status</th>
+                        <th class="p-4 font-bold text-right">Actions</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    {% if is_donations %}
+                    {% for donation, user in items.items %}
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="p-4">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="relative w-10 h-10 rounded-full border-2 border-white shadow-sm overflow-hidden bg-gray-100">
+                                    {% if user.image and user.image.startswith('http') %}
+                                    <img src="{{ user.image }}" loading="lazy" class="w-full h-full object-cover">
+                                    {% else %}
+                                    <div
+                                        class="w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-500 to-pink-500 text-white font-bold">
+                                        {{ user.name[0] if user.name else '?' }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <div class="font-bold text-gray-800">{{ user.name }}</div>
+                                    <div class="text-xs text-gray-500">{{ user.student_id }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="p-4">
+                            <span class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm font-bold">{{
+                                user.blood_group }}</span>
+                        </td>
+                        <td class="p-4">
+                            <div class="text-sm font-medium text-gray-800">{{ user.department or 'Not set' }}</div>
+                            <div class="text-xs text-gray-500">Batch {{ user.batch or 'N/A' }}</div>
+                        </td>
+                        <td class="p-4">
+                            <div class="text-sm font-medium text-gray-800">{{ donation.donation_date.strftime('%B
+                                %d, %Y') if donation.donation_date else 'N/A' }}</div>
+                        </td>
+                        <td class="p-4">
+                            <div class="text-sm text-gray-600">{{ donation.location or 'Not specified' }}</div>
+                        </td>
+                        <td class="p-4">
+                            <div class="text-sm text-gray-500 max-w-xs truncate">{{ donation.notes or '-' }}</div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    {% for user in items.items %}
+                    <tr class="hover:bg-gray-50 transition-colors group">
+                        <td class="p-4">
+                            <div class="flex items-center gap-3">
+                                <div class="relative">
+                                    <div
+                                        class="relative w-10 h-10 rounded-full border-2 border-white shadow-sm overflow-hidden bg-gray-100">
+                                        {% if user.image and user.image.startswith('http') %}
+                                        <img src="{{ user.image }}" loading="lazy" class="w-full h-full object-cover">
+                                        {% else %}
+                                        <div
+                                            class="w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-500 to-pink-500 text-white font-bold">
+                                            {{ user.name[0] if user.name else '?' }}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="font-bold text-gray-800">{{ user.name }}</div>
+                                    <div class="text-xs text-gray-500">{{ user.student_id }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="p-4">
+                            <div class="text-sm font-medium text-gray-800">{{ user.department or 'Not set' }}</div>
+                            <div class="text-xs text-gray-500">Batch {{ user.batch or 'N/A' }}</div>
+                        </td>
+                        <td class="p-4">
+                            <div class="text-sm font-medium text-gray-800">{{ user.mobile or 'N/A' }}</div>
+                            <div class="text-xs text-gray-500">{{ user.email or 'No email' }}</div>
+                        </td>
+                        <td class="p-4">
+                            <span class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm font-bold">{{
+                                user.blood_group }}</span>
+                        </td>
+                        <td class="p-4">
+                            {% if user.is_approved %}
+                            {% if user.is_available %}
+                            <span class="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-bold">
+                                <i class="fas fa-check-circle mr-1"></i>Available
+                            </span>
+                            {% else %}
+                            <span class="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs font-bold">
+                                <i class="fas fa-minus-circle mr-1"></i>Unavailable
+                            </span>
+                            {% endif %}
+                            {% else %}
+                            <span class="bg-orange-100 text-orange-700 px-2 py-1 rounded-full text-xs font-bold">
+                                <i class="fas fa-clock mr-1"></i>Pending
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="p-4 text-right">
+                            <div class="flex items-center justify-end gap-2">
+                                <!-- Toggle Hide Quick Action -->
+                                <button type="button" onclick="toggleAvailability({{ user.id }}, this)"
+                                    class="p-2 rounded-lg transition-colors {{ 'bg-orange-100 text-orange-500 hover:bg-orange-200' if user.is_archived else 'bg-teal-100 text-teal-600 hover:bg-teal-200' }}"
+                                    title="{{ 'Unhide Profile' if user.is_archived else 'Hide Profile' }}">
+                                    <i class="fas {{ 'fa-eye-slash' if user.is_archived else 'fa-eye' }}"></i>
+                                </button>
+                                <a href="{{ url_for('admin_edit_user', user_id=user.id) }}"
+                                    class="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors"
+                                    title="Edit User">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{{ url_for('admin_send_change_request', user_id=user.id) }}"
+                                    class="p-2 bg-purple-100 text-purple-600 rounded-lg hover:bg-purple-200 transition-colors"
+                                    title="Request Changes">
+                                    <i class="fas fa-envelope"></i>
+                                </a>
+                                {% if not user.is_approved %}
+                                <button type="button" onclick="quickApprove({{ user.id }}, this)"
+                                    class="p-2 bg-green-100 text-green-600 rounded-lg hover:bg-green-200 transition-colors"
+                                    title="Quick Approve">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                                {% endif %}
+                                <!-- Restore / Delete logic -->
+                                {% if user.is_deleted %}
+                                <form action="{{ url_for('admin_restore_user', user_id=user.id) }}" method="POST"
+                                    onsubmit="confirmAction(event, this, 'Are you sure you want to restore this deleted user?');"
+                                    class="inline">
+                                    <button type="submit"
+                                        class="p-2 bg-green-100 text-green-600 rounded-lg hover:bg-green-200 transition-colors"
+                                        title="Restore Account">
+                                        <i class="fas fa-user-check"></i>
+                                    </button>
+                                </form>
+                                {% else %}
+                                <form action="{{ url_for('admin_delete_user', user_id=user.id) }}" method="POST"
+                                    onsubmit="confirmAction(event, this, 'Are you sure you want to soft delete this user?');"
+                                    class="inline">
+                                    <button type="submit"
+                                        class="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors"
+                                        title="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if items.pages > 1 %}
+        <div class="flex justify-center items-center gap-2 mt-6 pt-4 border-t border-gray-100">
+            {% if items.has_prev %}
+            <a href="{{ url_for('admin_filter_users', filter_type=filter_type, page=items.prev_num, sort_by=sort_by, sort_order=sort_order, q=search_query) }}"
+                class="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700 font-medium transition-colors">
+                <i class="fas fa-chevron-left mr-1"></i> Previous
+            </a>
+            {% endif %}
+
+            <div class="flex items-center gap-1">
+                {% for page_num in items.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                {% if page_num %}
+                {% if page_num == items.page %}
+                <span class="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium">{{ page_num }}</span>
+                {% else %}
+                <a href="{{ url_for('admin_filter_users', filter_type=filter_type, page=page_num, sort_by=sort_by, sort_order=sort_order, q=search_query) }}"
+                    class="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700 font-medium transition-colors">
+                    {{ page_num }}
+                </a>
+                {% endif %}
+                {% else %}
+                <span class="px-2 text-gray-400">...</span>
+                {% endif %}
+                {% endfor %}
+            </div>
+
+            {% if items.has_next %}
+            <a href="{{ url_for('admin_filter_users', filter_type=filter_type, page=items.next_num, sort_by=sort_by, sort_order=sort_order, q=search_query) }}"
+                class="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700 font-medium transition-colors">
+                Next <i class="fas fa-chevron-right ml-1"></i>
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% else %}
+        <!-- Empty State -->
+        <div class="text-center py-16">
+            <i class="fas {{ filter_icon }} text-6xl text-gray-300 mb-4"></i>
+            <h3 class="text-xl font-bold text-gray-600 mb-2">No {{ filter_title | lower }} found</h3>
+            <p class="text-gray-500">There are currently no items in this category.</p>
+            <a href="{{ url_for('admin_panel') }}"
+                class="mt-4 inline-block px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors">
+                Go to Admin Panel
+            </a>
+        </div>
+        {% endif %}
+    </div>
+    </div>
+</section>
+
+<script>
+    // Programs by Faculty (same as homepage)
+    const programsByFaculty = {
+        'FST': [
+            'BSc in Computer Science and Engineering',
+            'BSc in Information and Communication Technology',
+            'BSc in Electrical and Electronic Engineering',
+            'MSc in Computer Science',
+            'MSc in Information and Communication Technology'
+        ],
+        'FASS': [
+            'BA in English',
+            'BA in Development Studies',
+            'MA in English',
+            'MA in Development Studies',
+            'MA in Governance and Public Policy'
+        ],
+        'FBS': [
+            'BBA in Marketing',
+            'BBA in Accounting and Information Systems',
+            'BBA in Finance and Banking',
+            'Bachelor of Business Administration (BBA)',
+            'MBA in Marketing',
+            'MBA in Finance and Banking',
+            'MBA in Accounting and Information Systems',
+            'MBA in Human Resource Management',
+            'Master of Business Administration (MBA)'
+        ],
+        'FSSS': [
+            'BSS in Peace, Conflict and Human Rights Studies',
+            'BSS in Mass Communication and Journalism',
+            'BSS in International Relations',
+            'Bachelor of Laws (LLB)',
+            'MSS in Mass Communication and Journalism',
+            'Master of Laws (LLM)',
+            'MSS in International Relations',
+            'Master in Peace, Conflict and Human Rights Studies'
+        ],
+        'FMS': [
+            'MPH in Epidemiology',
+            'Certificate in Hospital Management'
+        ]
+    };
+
+    // Initialize the program dropdown based on faculty
+    document.addEventListener('DOMContentLoaded', function () {
+        const facultySelect = document.getElementById('facultyFilterSelect');
+        const programSelect = document.getElementById('programFilterSelect');
+        const selectedDepartment = "{{ request.args.get('department', '') }}";
+        const selectedFaculty = "{{ request.args.get('faculty', '') }}";
+
+        function updatePrograms() {
+            const faculty = facultySelect.value;
+            programSelect.innerHTML = '<option value="">All Programs</option>';
+
+            if (faculty && programsByFaculty[faculty]) {
+                programsByFaculty[faculty].forEach(program => {
+                    const option = document.createElement('option');
+                    option.value = program;
+                    option.textContent = program;
+                    if (program === selectedDepartment) {
+                        option.selected = true;
+                    }
+                    programSelect.appendChild(option);
+                });
+            }
+        }
+
+        // Update on faculty change
+        facultySelect.addEventListener('change', updatePrograms);
+
+        // Initialize on page load if faculty is selected
+        if (selectedFaculty) {
+            updatePrograms();
+        }
+    });
+
+    // Current filter context (from server)
+    const CURRENT_FILTER = "{{ filter_type }}";
+
+    // Quick Action: Toggle Availability
+    async function toggleAvailability(userId, btn) {
+        const currentlyHidden = btn.title === 'Unhide Profile';
+        const result = await Swal.fire({
+            title: currentlyHidden ? 'Unhide Profile?' : 'Hide Profile?',
+            text: currentlyHidden
+                ? 'This will make the donor visible to the public again.'
+                : 'This will hide the donor from public search results.',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: currentlyHidden ? '#0d9488' : '#f97316',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: currentlyHidden ? 'Yes, unhide!' : 'Yes, hide!'
+        });
+        
+        if (!result.isConfirmed) return;
+
+        btn.disabled = true;
+        const icon = btn.querySelector('i');
+        const originalClass = icon.className;
+        icon.className = 'fas fa-spinner fa-spin';
+
+        try {
+            const response = await fetch(`/admin/quick-toggle-availability/${userId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                // Update button appearance based on new state
+                if (data.is_archived) {
+                    btn.className = 'p-2 rounded-lg transition-colors bg-orange-100 text-orange-500 hover:bg-orange-200';
+                    btn.title = 'Unhide Profile';
+                    icon.className = 'fas fa-eye-slash';
+                } else {
+                    btn.className = 'p-2 rounded-lg transition-colors bg-teal-100 text-teal-600 hover:bg-teal-200';
+                    btn.title = 'Hide Profile';
+                    icon.className = 'fas fa-eye';
+                }
+
+                // Remove row if the user no longer belongs on this filtered page
+                const shouldRemove =
+                    (CURRENT_FILTER === 'hidden' && !data.is_archived) ||
+                    (CURRENT_FILTER === 'donors' && data.is_archived) ||
+                    (CURRENT_FILTER === 'available' && data.is_archived);
+
+                if (shouldRemove) {
+                    const row = btn.closest('tr');
+                    row.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+                    row.style.opacity = '0';
+                    row.style.transform = 'translateX(20px)';
+                    setTimeout(() => {
+                        row.remove();
+                        const countEl = document.querySelector('h1 span');
+                        if (countEl) {
+                            const n = parseInt(countEl.textContent) || 0;
+                            countEl.textContent = Math.max(0, n - 1) + ' total';
+                        }
+                    }, 400);
+                }
+
+                showToast(data.message, 'success');
+            } else {
+                icon.className = originalClass;
+                showToast(data.error || 'Failed to toggle', 'error');
+            }
+        } catch (e) {
+            icon.className = originalClass;
+            showToast('Network error', 'error');
+        }
+        btn.disabled = false;
+    }
+
+    // Quick Action: Quick Approve
+    async function quickApprove(userId, btn) {
+        btn.disabled = true;
+        const icon = btn.querySelector('i');
+        icon.className = 'fas fa-spinner fa-spin';
+
+        try {
+            const response = await fetch(`/admin/quick-approve/${userId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                // Hide the approve button
+                btn.style.display = 'none';
+                showToast(data.message, 'success');
+            } else {
+                icon.className = 'fas fa-check';
+                showToast(data.error || 'Failed to approve', 'error');
+            }
+        } catch (e) {
+            icon.className = 'fas fa-check';
+            showToast('Network error', 'error');
+        }
+        btn.disabled = false;
+    }
+
+    // Toast notification helper
+    function showToast(message, type = 'success') {
+        const toast = document.createElement('div');
+        toast.className = `fixed bottom-4 right-4 px-4 py-2 rounded-lg shadow-lg text-white font-medium z-50 transform transition-all duration-300 ${type === 'success' ? 'bg-green-500' : 'bg-red-500'}`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+</script>
+{% endblock %}

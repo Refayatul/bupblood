@@ -1,0 +1,777 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Hero Section -->
+<div
+    class="bg-gradient-to-r from-red-600 via-primary to-pink-600 shadow-2xl rounded-3xl p-6 mb-8 text-center relative overflow-hidden">
+    <div class="absolute inset-0 bg-white opacity-5"></div>
+    <div class="relative z-10">
+        <div class="text-white text-6xl mb-6 animate-bounce">
+            <i class="fas fa-heartbeat"></i>
+        </div>
+        <h1
+            class="text-5xl font-extrabold text-white mb-4 bg-gradient-to-r from-yellow-300 to-white bg-clip-text text-transparent">
+            Join as a Blood Donor
+        </h1>
+        <p class="text-xl text-gray-100 max-w-2xl mx-auto leading-relaxed">
+            Every drop counts and every donation matters.
+        </p>
+        <div class="mt-6 flex justify-center">
+            <div class="bg-white/20 backdrop-blur-sm rounded-full px-6 py-2 text-white text-sm font-medium">
+                <i class="fas fa-star mr-2"></i> Be a Life Hero
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Registration Form -->
+<div
+    class="bg-white rounded-3xl shadow-2xl p-8 border border-gray-100 hover:shadow-3xl transition-all duration-300 transform hover:-translate-y-1">
+    <form method="POST" enctype="multipart/form-data" class="space-y-8 relative" id="registerForm">
+        {{ form.hidden_tag() }}
+
+        <!-- Loading Overlay -->
+        <div id="loadingOverlay"
+            class="hidden absolute inset-0 bg-white/90 z-50 flex flex-col items-center justify-center rounded-3xl backdrop-blur-sm">
+            <div class="animate-spin rounded-full h-16 w-16 border-b-4 border-red-600 mb-4"></div>
+            <p class="text-xl font-bold text-gray-800 animate-pulse">Creating Your Profile...</p>
+            <p class="text-sm text-gray-500 mt-2">Please wait while we register you.</p>
+        </div>
+
+        <!-- Student ID -->
+        <div class="animate-slide-in">
+            <label class="block text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
+                <i class="fas fa-id-card text-blue-500"></i> {{ form.student_id.label }}
+            </label>
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <i class="fas fa-id-card text-gray-400"></i>
+                </div>
+                {{ form.student_id(class="w-full p-4 pl-10 border-2 border-gray-200 rounded-2xl focus:ring-4
+                focus:ring-red-500 focus:border-red-500 transition-all shadow-sm group-hover:shadow-md bg-gradient-to-r
+                from-gray-50 to-white", placeholder="Enter Student ID") }}
+            </div>
+        </div>
+
+        <!-- Name -->
+        <div class="animate-slide-in" style="animation-delay: 0.1s;">
+            <label class="block text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
+                <i class="fas fa-user text-green-500"></i> {{ form.name.label }}
+            </label>
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <i class="fas fa-user text-gray-400"></i>
+                </div>
+                {{ form.name(class="w-full p-4 pl-10 border-2 border-gray-200 rounded-2xl focus:ring-4
+                focus:ring-red-500 focus:border-red-500 transition-all shadow-sm group-hover:shadow-md bg-gradient-to-r
+                from-gray-50 to-white", placeholder="Enter your full name") }}
+            </div>
+        </div>
+
+        <!-- Department Selection -->
+        <div class="space-y-6 animate-slide-in" style="animation-delay: 0.2s;">
+            <!-- Faculty Dropdown -->
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
+                    <i class="fas fa-university text-purple-500"></i> Faculty
+                </label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <i class="fas fa-university text-gray-400"></i>
+                    </div>
+                    <select id="facultySelect"
+                        class="w-full p-4 pl-10 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-red-500 focus:border-red-500 transition-all shadow-sm group-hover:shadow-md bg-gradient-to-r from-gray-50 to-white">
+                        <option value="">Select Faculty</option>
+                        <option value="FST">Faculty of Science and Technology (FST)</option>
+                        <option value="FASS">Faculty of Arts & Social Sciences (FASS)</option>
+                        <option value="FBS">Faculty of Business Studies (FBS)</option>
+                        <option value="FSSS">Faculty of Security & Strategic Studies (FSSS)</option>
+                        <option value="FMS">Faculty of Medical Studies (FMS)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Program Dropdown -->
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
+                    <i class="fas fa-graduation-cap text-indigo-500"></i> Program
+                </label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <i class="fas fa-graduation-cap text-gray-400"></i>
+                    </div>
+                    <select id="programSelect"
+                        class="w-full p-4 pl-10 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-red-500 focus:border-red-500 transition-all shadow-sm group-hover:shadow-md bg-gradient-to-r from-gray-50 to-white"
+                        disabled>
+                        <option value="">Select Faculty First</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Hidden Form Fields -->
+            <div class="hidden">
+                {{ form.faculty(id="facultyHidden") }}
+                {{ form.program(id="programHidden") }}
+            </div>
+        </div>
+
+        <script>
+            // Official BUP Programs organized by Faculty
+            const programsByFaculty = {
+                'FST': [
+                    'BSc in Computer Science and Engineering',
+                    'BSc in Information and Communication Engineering',
+                    'BSc in Environmental Science',
+                    'MSc in Computer Science and Engineering',
+                    'MSc in Information and Communication Engineering',
+                    'MSc in Information and Communication Technology',
+                    'MSc in Information Systems Security',
+                    'MSc in Cyber Security',
+                    'MSc in Environmental Science',
+                    'MSc in Environmental Science and Management',
+                    'Master in Environmental Science'
+                ],
+                'FASS': [
+                    'BSS in Disaster Management and Resilience',
+                    'BSS in Sociology',
+                    'BSS in Economics',
+                    'BSS in Disaster and Human Security Management',
+                    'BSS in Development Studies',
+                    'BSS in Public Administration',
+                    'BA in English',
+                    'Bachelor of Arts (BA)',
+                    'Bachelor of Social Science (BSS)',
+                    'Modern Languages',
+                    'MSS in Disaster Management and Resilience',
+                    'MSS in Sociology',
+                    'MA in Development Studies',
+                    'MA in English Language Teaching and Applied Linguistics',
+                    'Master of Public Administration (MPA)',
+                    'MSS in Development Studies',
+                    'MA in English Literature and Cultural Studies',
+                    'MSS in Economics',
+                    'MSS in Disaster and Human Security Management',
+                    'MA in Development Studies'
+                ],
+                'FBS': [
+                    'BBA in Management Studies',
+                    'BBA in Marketing',
+                    'BBA in Accounting and Information Systems',
+                    'BBA in Finance and Banking',
+                    'Bachelor of Business Administration (BBA)',
+                    'MBA in Marketing',
+                    'MBA in Finance and Banking',
+                    'MBA in Accounting and Information Systems',
+                    'MBA in Human Resource Management',
+                    'Master of Business Administration (MBA)'
+                ],
+                'FSSS': [
+                    'BSS in Peace, Conflict and Human Rights Studies',
+                    'BSS in Mass Communication and Journalism',
+                    'BSS in International Relations',
+                    'Bachelor of Laws (LLB)',
+                    'MSS in Mass Communication and Journalism',
+                    'Master of Laws (LLM)',
+                    'MSS in International Relations',
+                    'Master in Peace, Conflict and Human Rights Studies',
+                    'Master in Peace and Human Rights Development Studies'
+                ],
+                'FMS': [
+                    'MPH in Epidemiology',
+                    'Certificate in Hospital Management'
+                ]
+            };
+
+            const facultySelect = document.getElementById('facultySelect');
+            const programSelect = document.getElementById('programSelect');
+            const facultyHidden = document.getElementById('facultyHidden');
+            const programHidden = document.getElementById('programHidden');
+
+            facultySelect.addEventListener('change', function () {
+                const faculty = this.value;
+                programSelect.innerHTML = '<option value="">Select Program</option>';
+                programSelect.disabled = !faculty;
+                facultyHidden.value = faculty;  // Update hidden form field
+                programHidden.value = '';  // Clear program when faculty changes
+
+                if (faculty && programsByFaculty[faculty]) {
+                    programsByFaculty[faculty].forEach(program => {
+                        const option = document.createElement('option');
+                        option.value = program;
+                        option.textContent = program;
+                        programSelect.appendChild(option);
+                    });
+                }
+            });
+
+            programSelect.addEventListener('change', function () {
+                programHidden.value = this.value;  // Update hidden form field
+            });
+        </script>
+
+        <!-- Batch -->
+        <div class="animate-slide-in" style="animation-delay: 0.3s;">
+            <label class="block text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
+                <i class="fas fa-calendar text-orange-500"></i> {{ form.batch.label }}
+            </label>
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <i class="fas fa-calendar text-gray-400"></i>
+                </div>
+                {{ form.batch(class="w-full p-4 pl-10 border-2 border-gray-200 rounded-2xl focus:ring-4
+                focus:ring-red-500 focus:border-red-500 transition-all shadow-sm group-hover:shadow-md bg-gradient-to-r
+                from-gray-50 to-white") }}
+            </div>
+        </div>
+
+        <!-- Blood Group -->
+        <div class="animate-slide-in" style="animation-delay: 0.4s;">
+            <label class="block text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
+                <i class="fas fa-tint text-red-500"></i> {{ form.blood_group.label }}
+            </label>
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <i class="fas fa-tint text-gray-400"></i>
+                </div>
+                {{ form.blood_group(class="w-full p-4 pl-10 border-2 border-gray-200 rounded-2xl focus:ring-4
+                focus:ring-red-500 focus:border-red-500 transition-all shadow-sm group-hover:shadow-md bg-gradient-to-r
+                from-gray-50 to-white") }}
+            </div>
+        </div>
+
+        <!-- Date of Birth -->
+        <div class="animate-slide-in" style="animation-delay: 0.5s;">
+            <label class="block text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
+                <i class="fas fa-birthday-cake text-pink-500"></i> {{ form.date_of_birth.label }}
+            </label>
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <i class="fas fa-birthday-cake text-gray-400"></i>
+                </div>
+                {{ form.date_of_birth(class="w-full p-4 pl-10 border-2 border-gray-200 rounded-2xl focus:ring-4
+                focus:ring-red-500 focus:border-red-500 transition-all shadow-sm group-hover:shadow-md bg-gradient-to-r
+                from-gray-50 to-white") }}
+            </div>
+        </div>
+
+        <!-- Mobile Numbers -->
+        <div class="animate-slide-in" style="animation-delay: 0.6s;">
+            <label class="block text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
+                <i class="fas fa-phone text-blue-500"></i> Mobile Numbers
+            </label>
+            <div class="space-y-3">
+                <!-- Mobile Number 1 (Required) -->
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <i class="fas fa-phone text-gray-400"></i>
+                    </div>
+                    {{ form.mobile1(class="w-full p-4 pl-10 border-2 border-gray-200 rounded-2xl focus:ring-4
+                    focus:ring-red-500 focus:border-red-500 transition-all shadow-sm group-hover:shadow-md
+                    bg-gradient-to-r
+                    from-gray-50 to-white", placeholder="01512345678 (required)") }}
+                </div>
+
+                <!-- Mobile Number 2 (Optional) -->
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <i class="fas fa-phone text-gray-400"></i>
+                    </div>
+                    {{ form.mobile2(class="w-full p-4 pl-10 border-2 border-gray-200 rounded-2xl focus:ring-4
+                    focus:ring-red-500 focus:border-red-500 transition-all shadow-sm group-hover:shadow-md
+                    bg-gradient-to-r
+                    from-gray-50 to-white", placeholder="01712345678 (optional)") }}
+                </div>
+
+                <!-- Mobile Number 3 (Optional) -->
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <i class="fas fa-phone text-gray-400"></i>
+                    </div>
+                    {{ form.mobile3(class="w-full p-4 pl-10 border-2 border-gray-200 rounded-2xl focus:ring-4
+                    focus:ring-red-500 focus:border-red-500 transition-all shadow-sm group-hover:shadow-md
+                    bg-gradient-to-r
+                    from-gray-50 to-white", placeholder="01812345678 (optional)") }}
+                </div>
+
+                <div class="text-xs text-gray-500 flex items-center gap-1">
+                    <i class="fas fa-info-circle text-gray-400"></i>
+                    <span>Use format: 01512345678 (11 digits, no hyphens). At least one mobile number is
+                        required.</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Email -->
+        <div class="animate-slide-in" style="animation-delay: 0.7s;">
+            <label class="block text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
+                <i class="fas fa-envelope text-red-500"></i> {{ form.email.label }} <span class="text-red-500">*</span>
+            </label>
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <i class="fas fa-envelope text-gray-400"></i>
+                </div>
+                {{ form.email(class="w-full p-4 pl-10 border-2 border-gray-200 rounded-2xl focus:ring-4
+                focus:ring-red-500 focus:border-red-500 transition-all shadow-sm group-hover:shadow-md bg-gradient-to-r
+                from-gray-50 to-white", placeholder="your.email@example.com") }}
+            </div>
+            <p class="text-xs text-gray-500 mt-2 flex items-center gap-1">
+                <i class="fas fa-info-circle text-gray-400"></i> Required for account security and password recovery
+            </p>
+        </div>
+
+        <!-- Address -->
+        <div class="animate-slide-in" style="animation-delay: 0.8s;">
+            <label class="block text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
+                <i class="fas fa-map-marker-alt text-green-500"></i> {{ form.address.label }}
+            </label>
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <i class="fas fa-map-marker-alt text-gray-400"></i>
+                </div>
+                {{ form.address(class="w-full p-4 pl-10 border-2 border-gray-200 rounded-2xl focus:ring-4
+                focus:ring-red-500 focus:border-red-500 transition-all shadow-sm group-hover:shadow-md bg-gradient-to-r
+                from-gray-50 to-white", placeholder="Enter your address") }}
+            </div>
+        </div>
+
+        <!-- Profile Image -->
+        <div class="animate-slide-in" style="animation-delay: 0.9s;">
+            <label class="block text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
+                <i class="fas fa-camera text-purple-500"></i> {{ form.image.label }}
+            </label>
+            <div class="flex items-center justify-center w-full">
+                <label
+                    class="flex flex-col w-full h-auto min-h-[128px] border-2 border-dashed border-gray-300 hover:bg-gray-50 hover:border-primary transition rounded-2xl items-center justify-center cursor-pointer group hover:shadow-md overflow-hidden relative"
+                    id="dropzone">
+
+                    <div class="flex flex-col items-center justify-center h-32 w-full" id="uploadPrompt">
+                        <div class="p-3 bg-gray-100 rounded-full mb-2 group-hover:bg-blue-50 transition">
+                            <i class="fas fa-cloud-upload-alt text-xl text-gray-400 group-hover:text-primary"></i>
+                        </div>
+                        <p class="text-sm text-gray-500 group-hover:text-gray-700 font-medium">Click to upload photo</p>
+                        <p class="text-xs text-gray-400">Max 2MB, JPG/PNG</p>
+                    </div>
+
+                    <img id="imagePreview" class="hidden w-full h-auto max-h-[500px] object-contain bg-gray-50" />
+
+                    <div id="previewOverlay"
+                        class="hidden absolute inset-0 flex items-center justify-center bg-black/30 text-white font-bold opacity-0 group-hover:opacity-100 transition-opacity">
+                        Change Image
+                    </div>
+
+                    {{ form.image(class="opacity-0 absolute inset-0 cursor-pointer", id="imageInput") }}
+                </label>
+                <!-- Auto-closing popup for file size errors -->
+                <div id="fileSizePopup"
+                    class="hidden fixed top-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg shadow-lg z-50 flex items-center justify-between max-w-sm">
+                    <div class="flex items-center">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        <span class="font-medium">File too large! Please select an image under 2MB.</span>
+                    </div>
+                    <button onclick="closeFileSizePopup()" class="ml-3 text-red-700 hover:text-red-900">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Image Cropping Interface -->
+            <div id="cropContainer" class="hidden mt-6 p-6 bg-gray-50 rounded-xl border border-gray-200">
+                <div class="text-center mb-4">
+                    <h4 class="text-lg font-bold text-gray-800 mb-2">Crop Your Photo</h4>
+                    <p class="text-sm text-gray-600">Adjust the crop area to focus on your face for better
+                        identification</p>
+                </div>
+
+                <!-- Cropper Container -->
+                <div class="relative max-w-md mx-auto mb-4">
+                    <img id="cropperImage" class="max-w-full h-auto block mx-auto" />
+                </div>
+
+                <!-- Crop Controls -->
+                <div class="flex flex-wrap justify-center gap-3 mb-4">
+                    <button type="button" id="cropBtn"
+                        class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition flex items-center gap-2">
+                        <i class="fas fa-crop"></i> Save Crop
+                    </button>
+                    <button type="button" id="rotateLeftBtn"
+                        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2">
+                        <i class="fas fa-undo"></i> Rotate Left
+                    </button>
+                    <button type="button" id="rotateRightBtn"
+                        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2">
+                        <i class="fas fa-redo"></i> Rotate Right
+                    </button>
+                    <button type="button" id="resetCropBtn"
+                        class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition flex items-center gap-2">
+                        <i class="fas fa-undo"></i> Reset
+                    </button>
+                    <button type="button" id="cancelCropBtn"
+                        class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition flex items-center gap-2">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                </div>
+
+                <div class="text-center text-sm text-gray-500">
+                    <i class="fas fa-info-circle mr-1"></i>
+                    Drag to move crop area • Drag corners to resize • Face should fit nicely within the crop box
+                </div>
+            </div>
+        </div>
+
+        <!-- Available to Donate Blood -->
+        <div class="animate-slide-in" style="animation-delay: 1.0s;">
+            <div class="flex flex-col items-center justify-center p-4">
+                <label class="relative inline-flex items-center cursor-pointer">
+                    {{ form.is_available(class="sr-only peer", id="availabilityToggle") }}
+                    <div
+                        class="w-16 h-8 bg-gray-300 rounded-full peer peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 peer-checked:bg-gradient-to-r peer-checked:from-green-500 peer-checked:to-blue-500 transition-all duration-300 shadow-inner">
+                    </div>
+                    <div
+                        class="absolute top-0.5 left-[4px] bg-white border border-gray-300 rounded-full h-7 w-7 transition-transform duration-300 peer-checked:translate-x-8 shadow-md">
+                    </div>
+                    <div class="ml-3 text-sm font-medium w-36">
+                        <span id="availabilityText" class="text-gray-500 font-medium">
+                            <i class="fas fa-moon mr-1"></i> Unavailable
+                        </span>
+                    </div>
+                </label>
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const toggle = document.getElementById('availabilityToggle');
+                const textSpan = document.getElementById('availabilityText');
+
+                function updateToggleState() {
+                    if (toggle.checked) {
+                        textSpan.innerHTML = '<i class="fas fa-check-circle mr-1"></i> Want to Donate';
+                        textSpan.className = 'text-green-600 font-bold';
+                    } else {
+                        textSpan.innerHTML = '<i class="fas fa-moon mr-1"></i> Unavailable';
+                        textSpan.className = 'text-gray-500 font-medium';
+                    }
+                }
+
+                updateToggleState();
+                toggle.addEventListener('change', updateToggleState);
+            });
+        </script>
+
+
+        <!-- Password -->
+        <div class="animate-slide-in" style="animation-delay: 1.1s;">
+            <label class="block text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
+                <i class="fas fa-lock text-yellow-500"></i> {{ form.password.label }}
+            </label>
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <i class="fas fa-lock text-gray-400"></i>
+                </div>
+                {{ form.password(class="w-full p-4 pl-10 pr-12 border-2 border-gray-200 rounded-2xl focus:ring-4
+                focus:ring-red-500 focus:border-red-500 transition-all shadow-sm group-hover:shadow-md bg-gradient-to-r
+                from-gray-50 to-white", placeholder="Minimum 6 characters", id="password") }}
+                <button type="button" onclick="togglePassword('password', 'eye-icon-pass')"
+                    class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none z-10">
+                    <i id="eye-icon-pass" class="fas fa-eye"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Confirm Password -->
+        <div class="animate-slide-in" style="animation-delay: 1.2s;">
+            <label class="block text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
+                <i class="fas fa-shield-alt text-green-500"></i> {{ form.confirm_password.label }}
+            </label>
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <i class="fas fa-shield-alt text-gray-400"></i>
+                </div>
+                {{ form.confirm_password(class="w-full p-4 pl-10 pr-12 border-2 border-gray-200 rounded-2xl focus:ring-4
+                focus:ring-red-500 focus:border-red-500 transition-all shadow-sm group-hover:shadow-md bg-gradient-to-r
+                from-gray-50 to-white", placeholder="Re-enter your password", id="confirm_password") }}
+                <button type="button" onclick="togglePassword('confirm_password', 'eye-icon-confirm')"
+                    class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none z-10">
+                    <i id="eye-icon-confirm" class="fas fa-eye"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="text-center animate-slide-in" style="animation-delay: 1.3s;">
+            <button type="submit"
+                class="w-full bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white py-4 px-8 rounded-2xl shadow-xl hover:shadow-2xl transform hover:-translate-y-1 font-bold text-lg cursor-pointer flex items-center justify-center gap-3 group transition-all duration-300">
+                <i class="fas fa-heartbeat group-hover:animate-pulse"></i> Register as Life Hero
+                <i class="fas fa-arrow-right transition-transform group-hover:translate-x-1"></i>
+            </button>
+        </div>
+        <script>
+            function togglePassword(inputId, iconId) {
+                // Get both password inputs and icons
+                const passwordInput = document.getElementById('password');
+                const confirmInput = document.getElementById('confirm_password');
+                const passwordIcon = document.getElementById('eye-icon-pass');
+                const confirmIcon = document.getElementById('eye-icon-confirm');
+
+                // Toggle both fields together
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    confirmInput.type = 'text';
+                    passwordIcon.classList.remove('fa-eye');
+                    passwordIcon.classList.add('fa-eye-slash');
+                    confirmIcon.classList.remove('fa-eye');
+                    confirmIcon.classList.add('fa-eye-slash');
+                } else {
+                    passwordInput.type = 'password';
+                    confirmInput.type = 'password';
+                    passwordIcon.classList.remove('fa-eye-slash');
+                    passwordIcon.classList.add('fa-eye');
+                    confirmIcon.classList.remove('fa-eye-slash');
+                    confirmIcon.classList.add('fa-eye');
+                }
+            }
+
+            // Image Preview & Cropping Logic
+            const imageInput = document.getElementById('imageInput');
+            const imagePreview = document.getElementById('imagePreview');
+            const uploadPrompt = document.getElementById('uploadPrompt');
+            const previewOverlay = document.getElementById('previewOverlay');
+            const registerForm = document.getElementById('registerForm');
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            const fileSizePopup = document.getElementById('fileSizePopup');
+
+            // Cropping related elements
+            const cropContainer = document.getElementById('cropContainer');
+            const cropperImage = document.getElementById('cropperImage');
+            const cropBtn = document.getElementById('cropBtn');
+            const rotateLeftBtn = document.getElementById('rotateLeftBtn');
+            const rotateRightBtn = document.getElementById('rotateRightBtn');
+            const resetCropBtn = document.getElementById('resetCropBtn');
+            const cancelCropBtn = document.getElementById('cancelCropBtn');
+
+            let cropper = null;
+            let originalImageData = null;
+
+            function initializeCropper() {
+                if (cropper) {
+                    cropper.destroy();
+                }
+                cropper = new Cropper(cropperImage, {
+                    aspectRatio: 1, // Square crop for faces
+                    viewMode: 1,
+                    dragMode: 'move',
+                    autoCropArea: 1,
+                    restore: false,
+                    guides: true,
+                    center: true,
+                    highlight: false,
+                    cropBoxMovable: true,
+                    cropBoxResizable: true,
+                    toggleDragModeOnDblclick: false,
+                    responsive: true,
+                    background: false,
+                });
+            }
+
+            function hideCropInterface() {
+                cropContainer.classList.add('hidden');
+                if (cropper) {
+                    cropper.destroy();
+                    cropper = null;
+                }
+            }
+
+            function showFileSizePopup() {
+                fileSizePopup.classList.remove('hidden');
+                // Auto-close after 3 seconds
+                setTimeout(() => {
+                    closeFileSizePopup();
+                }, 3000);
+            }
+
+            function closeFileSizePopup() {
+                fileSizePopup.classList.add('hidden');
+            }
+
+            if (imageInput) {
+                imageInput.addEventListener('change', function (e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        // Check if file size > 2MB
+                        if (file.size > 2 * 1024 * 1024) {
+                            showFileSizePopup();
+                            this.value = ""; // Clear the input
+                            return;
+                        }
+
+                        const reader = new FileReader();
+                        reader.onload = function (e) {
+                            originalImageData = e.target.result;
+                            imagePreview.src = originalImageData;
+                            imagePreview.classList.remove('hidden');
+                            uploadPrompt.classList.add('hidden');
+                            previewOverlay.classList.remove('hidden');
+
+                            // Set up cropping
+                            cropperImage.src = originalImageData;
+                            initializeCropper();
+                            cropContainer.classList.remove('hidden');
+                            cropContainer.scrollIntoView({ behavior: 'smooth' });
+                        }
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+
+            // Handle image preview click to edit crop
+            if (previewOverlay) {
+                previewOverlay.addEventListener('click', function () {
+                    if (originalImageData) {
+                        cropperImage.src = originalImageData;
+                        initializeCropper();
+                        cropContainer.classList.remove('hidden');
+                        cropContainer.scrollIntoView({ behavior: 'smooth' });
+                    }
+                });
+            }
+
+            // Crop button handler
+            if (cropBtn) {
+                cropBtn.addEventListener('click', function () {
+                    if (cropper) {
+                        const canvas = cropper.getCroppedCanvas({
+                            width: 320, // Optimized 320px for clear face visibility
+                            height: 320, // Optimized 320px for clear face visibility
+                            imageSmoothingEnabled: true,
+                            imageSmoothingQuality: 'high',
+                        });
+
+                        const croppedDataURL = canvas.toDataURL('image/jpeg', 0.9);
+
+                        // Update preview
+                        imagePreview.src = croppedDataURL;
+                        imagePreview.classList.remove('hidden');
+                        uploadPrompt.classList.add('hidden');
+                        previewOverlay.classList.remove('hidden');
+
+                        // Convert to blob and create file for form submission
+                        canvas.toBlob(function (blob) {
+                            const croppedFile = new File([blob], 'cropped_image.jpg', {
+                                type: 'image/jpeg',
+                                lastModified: Date.now()
+                            });
+
+                            // Create new DataTransfer to update the file input
+                            const dt = new DataTransfer();
+                            dt.items.add(croppedFile);
+
+                            // Clear and set the new file
+                            imageInput.files = dt.files;
+                        }, 'image/jpeg', 0.9);
+
+                        hideCropInterface();
+                    }
+                });
+            }
+
+            // Rotate buttons
+            if (rotateLeftBtn) {
+                rotateLeftBtn.addEventListener('click', function () {
+                    if (cropper) {
+                        cropper.rotate(-90);
+                    }
+                });
+            }
+
+            if (rotateRightBtn) {
+                rotateRightBtn.addEventListener('click', function () {
+                    if (cropper) {
+                        cropper.rotate(90);
+                    }
+                });
+            }
+
+            // Reset crop button
+            if (resetCropBtn) {
+                resetCropBtn.addEventListener('click', function () {
+                    if (cropper) {
+                        cropper.reset();
+                    }
+                });
+            }
+
+            // Cancel crop button
+            if (cancelCropBtn) {
+                cancelCropBtn.addEventListener('click', function () {
+                    hideCropInterface();
+                });
+            }
+
+            if (registerForm) {
+                registerForm.addEventListener('submit', function () {
+                    loadingOverlay.classList.remove('hidden');
+                });
+            }
+        </script>
+    </form>
+</div>
+
+<!-- Additional Info -->
+<div class="mt-12 text-center">
+    <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-100">
+        <h3 class="text-lg font-bold text-gray-800 mb-3 flex items-center justify-center gap-2">
+            <i class="fas fa-shield-alt text-green-500"></i> Your Safety First
+        </h3>
+        <p class="text-sm text-gray-600 leading-relaxed">
+            We prioritize your privacy and security. All your information is encrypted and stored securely.
+            Your data will never be shared with third parties without your consent.
+        </p>
+    </div>
+</div>
+
+<style>
+    @keyframes slide-in {
+        from {
+            opacity: 0;
+            transform: translateY(30px) scale(0.9);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    .animate-slide-in {
+        animation: slide-in 0.6s ease-out forwards;
+    }
+
+    .animate-bounce {
+        animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+
+        0%,
+        20%,
+        53%,
+        80%,
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+
+        40%,
+        43% {
+            transform: translate3d(0, -6px, 0);
+        }
+
+        70% {
+            transform: translate3d(0, -4px, 0);
+        }
+
+        90% {
+            transform: translate3d(0, -2px, 0);
+        }
+    }
+</style>
+{% endblock %}

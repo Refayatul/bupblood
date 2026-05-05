@@ -1,0 +1,241 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="py-6 bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100 min-h-screen">
+    <div class="container mx-auto px-4 max-w-4xl">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6 animate-fade-in">
+            <div>
+                <h1 class="text-2xl font-black text-gray-800 tracking-tight flex items-center gap-2">
+                    <i class="fas fa-envelope text-purple-600"></i> Send <span class="text-gray-400">Change
+                        Request</span>
+                </h1>
+                <p class="text-gray-500 text-sm mt-1">Request {{ user.name }} to update their registration information
+                </p>
+            </div>
+            <a href="{{ url_for('admin_panel') }}"
+                class="flex items-center gap-2 bg-white hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-xl shadow-sm border border-gray-200 transition-colors font-medium text-sm">
+                <i class="fas fa-arrow-left"></i> Back to Admin Panel
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- User Details Card (Left Side) -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 sticky top-6">
+                    <!-- User Avatar & Name -->
+                    <div class="text-center mb-6">
+                        <div
+                            class="relative w-24 h-24 mx-auto mb-4 rounded-full border-4 border-white shadow-lg overflow-hidden bg-gray-100">
+                            <div class="absolute inset-0 skeleton z-0"></div>
+                            {% if user.image and user.image.startswith('http') %}
+                            <img src="{{ user.image }}" alt="{{ user.name }}" loading="lazy"
+                                onload="this.classList.remove('opacity-0'); this.previousElementSibling.style.display='none';"
+                                class="w-full h-full object-cover opacity-0 transition-opacity duration-500 relative z-10">
+                            {% elif user.image %}
+                            <img src="{{ url_for('static', filename='images/' + user.image) }}" alt="{{ user.name }}"
+                                loading="lazy"
+                                onload="this.classList.remove('opacity-0'); this.previousElementSibling.style.display='none';"
+                                class="w-full h-full object-cover opacity-0 transition-opacity duration-500 relative z-10">
+                            {% else %}
+                            <div
+                                class="w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-500 to-pink-500 text-white text-2xl font-bold">
+                                {{ user.name[0] if user.name else '?' }}
+                            </div>
+                            {% endif %}
+                            {% if not user.is_approved %}
+                            <div
+                                class="absolute -bottom-1 -right-1 w-6 h-6 bg-orange-500 rounded-full border-2 border-white flex items-center justify-center">
+                                <i class="fas fa-clock text-white text-xs"></i>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-800">{{ user.name }}</h3>
+                        <p class="text-sm text-gray-500">{{ user.student_id }}</p>
+                        {% if user.is_approved %}
+                        <span
+                            class="inline-block mt-2 bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold">
+                            <i class="fas fa-check-circle mr-1"></i> Approved
+                        </span>
+                        {% else %}
+                        <span
+                            class="inline-block mt-2 bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-xs font-bold">
+                            <i class="fas fa-clock mr-1"></i> Pending Approval
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <!-- User Info List -->
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-3 p-3 bg-red-50 rounded-lg">
+                            <i class="fas fa-tint text-red-600 w-4"></i>
+                            <div class="flex-1">
+                                <p class="text-xs text-gray-500 font-medium">Blood Group</p>
+                                <p class="font-bold text-red-600">{{ user.blood_group or 'Not set' }}</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
+                            <i class="fas fa-university text-blue-600 w-4"></i>
+                            <div class="flex-1">
+                                <p class="text-xs text-gray-500 font-medium">Department/Program</p>
+                                <p class="font-semibold text-gray-800 text-sm">{{ user.department or 'Not set' }}</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
+                            <i class="fas fa-users text-green-600 w-4"></i>
+                            <div class="flex-1">
+                                <p class="text-xs text-gray-500 font-medium">Batch</p>
+                                <p class="font-semibold text-gray-800">{{ user.batch or 'Not set' }}</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3 p-3 bg-yellow-50 rounded-lg">
+                            <i class="fas fa-envelope text-yellow-600 w-4"></i>
+                            <div class="flex-1">
+                                <p class="text-xs text-gray-500 font-medium">Email</p>
+                                <p class="font-semibold text-gray-800 text-sm break-all">{{ user.email or 'Not provided'
+                                    }}</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3 p-3 bg-purple-50 rounded-lg">
+                            <i class="fas fa-phone text-purple-600 w-4"></i>
+                            <div class="flex-1">
+                                <p class="text-xs text-gray-500 font-medium">Mobile</p>
+                                <p class="font-semibold text-gray-800">{{ user.mobile or 'Not provided' }}</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3 p-3 bg-indigo-50 rounded-lg">
+                            <i class="fas fa-map-marker-alt text-indigo-600 w-4"></i>
+                            <div class="flex-1">
+                                <p class="text-xs text-gray-500 font-medium">Address</p>
+                                <p class="font-semibold text-gray-800 text-sm">{{ user.address or 'Not provided' }}</p>
+                            </div>
+                        </div>
+
+                        {% if user.date_of_birth %}
+                        <div class="flex items-center gap-3 p-3 bg-pink-50 rounded-lg">
+                            <i class="fas fa-birthday-cake text-pink-600 w-4"></i>
+                            <div class="flex-1">
+                                <p class="text-xs text-gray-500 font-medium">Date of Birth</p>
+                                <p class="font-semibold text-gray-800">{{ user.date_of_birth.strftime('%B %d, %Y') }}
+                                </p>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if user.created_at %}
+                        <div class="flex items-center gap-3 p-3 bg-teal-50 rounded-lg">
+                            <i class="fas fa-calendar-plus text-teal-600 w-4"></i>
+                            <div class="flex-1">
+                                <p class="text-xs text-gray-500 font-medium">Registered On</p>
+                                <p class="font-semibold text-gray-800 text-sm">{{ user.created_at.strftime('%B %d, %Y at
+                                    %I:%M %p') }}</p>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if user.is_available is not none %}
+                        <div
+                            class="flex items-center gap-3 p-3 {{ 'bg-green-50' if user.is_available else 'bg-gray-50' }} rounded-lg">
+                            <i
+                                class="fas fa-heartbeat {{ 'text-green-600' if user.is_available else 'text-gray-400' }} w-4"></i>
+                            <div class="flex-1">
+                                <p class="text-xs text-gray-500 font-medium">Availability</p>
+                                <p
+                                    class="font-semibold {{ 'text-green-600' if user.is_available else 'text-gray-500' }}">
+                                    {{ 'Available for Donation' if user.is_available else 'Not Available' }}
+                                </p>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form (Right Side) -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        <i class="fas fa-edit text-purple-600"></i> Compose Change Request
+                    </h2>
+
+                    <form method="POST" class="space-y-6">
+                        <div>
+                            <label for="change_reason" class="block text-gray-700 font-semibold mb-2">
+                                Requested Changes <span class="text-red-500">*</span>
+                            </label>
+                            <textarea name="change_reason" id="change_reason" rows="8"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-700 placeholder-gray-400 transition-all"
+                                placeholder="Please describe what changes you want the user to make to their registration...
+
+Examples:
+- Your address field is missing or incomplete. Please provide your full address.
+- The mobile number you provided appears incorrect.
+- Please update your department/program information.
+- Your profile picture is not clear. Please upload a clearer photo." required></textarea>
+                            <p class="text-xs text-gray-500 mt-1">Be specific about what needs to be corrected so the
+                                user knows exactly what to update.</p>
+                        </div>
+
+                        <div>
+                            <label for="admin_name" class="block text-gray-700 font-semibold mb-2">Your Name
+                                (Optional)</label>
+                            <input type="text" name="admin_name" id="admin_name" value="Admin"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-700 placeholder-gray-400 transition-all"
+                                placeholder="Enter your name (will appear in the email)">
+                        </div>
+
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <button type="submit"
+                                class="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center gap-2">
+                                <i class="fas fa-paper-plane"></i> Send Change Request Email
+                            </button>
+                            <a href="{{ url_for('admin_panel') }}"
+                                class="px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-semibold text-center">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Info Box -->
+                <div class="mt-6 bg-amber-50 border border-amber-200 rounded-2xl p-5">
+                    <h4 class="font-bold text-amber-800 mb-3 flex items-center gap-2">
+                        <i class="fas fa-info-circle"></i> What happens when you send this request?
+                    </h4>
+                    <ul class="text-sm text-amber-700 space-y-2">
+                        {% if not user.is_approved %}
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-envelope mt-1 text-amber-600"></i>
+                            <span>Since this user is <strong>pending approval</strong>, the email will ask them to reply
+                                with corrected info or re-register.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-user-clock mt-1 text-amber-600"></i>
+                            <span>The user cannot login to update their profile until you approve them.</span>
+                        </li>
+                        {% else %}
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-envelope mt-1 text-amber-600"></i>
+                            <span>An email will be sent to the user explaining the required changes.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-sign-in-alt mt-1 text-amber-600"></i>
+                            <span>The user will be asked to login and update their profile.</span>
+                        </li>
+                        {% endif %}
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-search mt-1 text-amber-600"></i>
+                            <span>You can track changes by searching for the user in the admin panel.</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

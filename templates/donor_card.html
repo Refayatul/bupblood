@@ -1,0 +1,153 @@
+<div
+    class="bg-white rounded-2xl shadow-xl border border-gray-100 hover:shadow-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-2 flex flex-col h-full group relative overflow-hidden">
+    <!-- Status Indicator Bar -->
+    <div
+        class="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-transparent via-red-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+    </div>
+
+    <div class="p-6 flex flex-col h-full">
+        <!-- User Info Header -->
+        <div class="flex items-center gap-4 mb-4">
+            <div class="relative">
+                <div
+                    class="relative w-20 h-20 rounded-full border-4 border-white shadow-lg group-hover:scale-110 transition-transform duration-300 overflow-hidden bg-gray-100">
+                    <!-- Skeleton Placeholder -->
+                    <div class="absolute inset-0 skeleton z-0"></div>
+
+                    {% if user.image.startswith('http') %}
+                    <img src="{{ user.image }}" alt="{{ user.name }}" loading="lazy"
+                        onload="this.classList.remove('opacity-0'); this.previousElementSibling.style.display='none';"
+                        class="w-full h-full object-cover opacity-0 transition-opacity duration-500 relative z-10">
+                    {% else %}
+                    <img src="{{ url_for('static', filename='images/' + user.image) }}" alt="{{ user.name }}"
+                        loading="lazy"
+                        onload="this.classList.remove('opacity-0'); this.previousElementSibling.style.display='none';"
+                        class="w-full h-full object-cover opacity-0 transition-opacity duration-500 relative z-10">
+                    {% endif %}
+                </div>
+
+                <!-- Status Badge -->
+                <div
+                    class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full border-2 border-white flex items-center justify-center">
+                    {% if user.is_actually_available %}
+                    <div class="w-4 h-4 bg-green-500 rounded-full animate-pulse"></div>
+                    {% else %}
+                    <div class="w-4 h-4 bg-gray-500 rounded-full"></div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="flex-1">
+                <h3
+                    class="text-xl font-bold text-gray-800 mb-1 group-hover:text-primary transition-colors duration-300">
+                    {{ user.name }}
+                </h3>
+
+                <!-- Status Badge -->
+                <div
+                    class="inline-flex items-center gap-2 bg-gradient-to-r from-blue-50 to-indigo-50 px-3 py-1 rounded-full text-xs font-semibold border border-blue-200">
+                    <span
+                        class="w-2 h-2 rounded-full {% if user.is_actually_available %}bg-green-500{% else %}bg-gray-500{% endif %}"></span>
+                    {% if user.is_actually_available %}
+                    <span class="text-green-700">Available to Donate</span>
+                    {% else %}
+                    <span class="text-gray-600">Currently Unavailable</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Blood Group - Prominent Display -->
+        <div class="mb-4 text-center">
+            <div
+                class="inline-block bg-gradient-to-r from-red-50 to-pink-50 px-6 py-3 rounded-full border border-red-200">
+                <span class="text-3xl font-extrabold text-red-600">{{ user.blood_group }}</span>
+                <div class="text-xs text-red-600 font-medium mt-1">
+                    {% if user.blood_group == 'O-' %}Universal Donor
+                    {% elif user.blood_group == 'AB+' %}Universal Recipient
+                    {% else %}Compatible Donor{% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- User Details -->
+        <div class="flex-grow space-y-3 mb-4">
+            <div
+                class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-blue-50 transition-colors duration-200">
+                <div class="p-2 bg-blue-100 rounded-lg">
+                    <i class="fas fa-university text-blue-600"></i>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-500 font-medium">Department</p>
+                    <p class="font-semibold text-gray-800">{{ user.department }}</p>
+                </div>
+            </div>
+
+            <div
+                class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-green-50 transition-colors duration-200">
+                <div class="p-2 bg-green-100 rounded-lg">
+                    <i class="fas fa-users text-green-600"></i>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-500 font-medium">Batch</p>
+                    <p class="font-semibold text-gray-800">{{ user.batch }}</p>
+                </div>
+            </div>
+
+            <div
+                class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-purple-50 transition-colors duration-200">
+                <div class="p-2 bg-purple-100 rounded-lg">
+                    <i class="fas fa-map-marker-alt text-purple-600"></i>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-500 font-medium">Address</p>
+                    <p class="font-semibold text-gray-800">{{ user.address or 'Not specified' }}</p>
+                </div>
+            </div>
+
+            {% if user.last_donation_date %}
+            <div
+                class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-yellow-50 transition-colors duration-200">
+                <div class="p-2 bg-yellow-100 rounded-lg">
+                    <i class="fas fa-calendar-alt text-yellow-600"></i>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-500 font-medium">Last Donation</p>
+                    <p class="font-semibold text-gray-800">{{ user.last_donation_date.strftime('%d %b, %Y') }}</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Mobile Numbers Display -->
+        {% set mobile_list = user.mobile.split(',') | map('trim') | reject('equalto', '') | list %}
+        <div class="mb-4">
+            <p class="text-xs text-gray-500 font-medium mb-2">Contact Numbers</p>
+            <div class="space-y-2">
+                {% for mobile in mobile_list %}
+                <div class="flex items-center gap-2 p-2 bg-gray-50 rounded-lg border">
+                    <span class="flex-1 text-sm font-mono text-gray-800">{{ mobile }}</span>
+                    <button onclick="copyToClipboard('{{ mobile }}')" title="Copy {{ mobile }}"
+                        class="px-3 py-2 bg-blue-100 hover:bg-blue-200 rounded-md transition-colors group">
+                        <i class="fas fa-copy text-blue-600 group-hover:text-blue-800"></i>
+                    </button>
+                    <a href="https://wa.me/88{{ mobile }}?text=Hi%20{{ user.name.replace(' ', '%20') }}%2C%20I%20need%20{{ user.blood_group.replace('+', '%2B') }}%20blood.%20I%20got%20your%20number%20from%20BUP%20Blood%20Bank.%20Can%20you%20help%3F"
+                        target="_blank" title="WhatsApp {{ mobile }}"
+                        class="px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors group">
+                        <i class="fab fa-whatsapp text-white"></i>
+                    </a>
+                    <a href="tel:{{ mobile }}" title="Call {{ mobile }}"
+                        class="px-3 py-2 bg-green-100 hover:bg-green-200 rounded-md transition-colors group">
+                        <i class="fas fa-phone text-green-600 group-hover:text-green-800"></i>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Hover Effect Overlay -->
+    <div
+        class="absolute inset-0 bg-gradient-to-br from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+    </div>
+</div>
