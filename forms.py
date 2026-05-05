@@ -14,38 +14,38 @@ def validate_multiple_mobiles(form, field):
             mobiles.append(mobile_field.data.strip())
 
     if not mobiles:
-        raise ValidationError('At least one mobile number is required')
+        raise ValidationError('⚠️ At least one mobile number is required')
     # Bangladeshi mobile pattern: 01XXXXXXXX (11 digits without hyphen)
     mobile_pattern = re.compile(r'^01\d{9}$')
 
     seen_mobiles = set()
     for mobile in mobiles:
         if not mobile_pattern.match(mobile):
-            raise ValidationError(f'Invalid mobile format: {mobile}. Use format 01XXXXXXXXX (11 digits)')
+            raise ValidationError(f'❌ Invalid format: {mobile}. Use 11 digits (e.g. 01XXXXXXXXX)')
         if mobile in seen_mobiles:
-            raise ValidationError(f'Duplicate mobile number: {mobile}')
+            raise ValidationError(f'⚠️ Duplicate number: {mobile}')
         seen_mobiles.add(mobile)
 
 def validate_mobile(form, field):
     """Custom validator for Bangladeshi mobile numbers"""
     if not field.data:
-        raise ValidationError('At least one mobile number is required')
+        raise ValidationError('⚠️ At least one mobile number is required')
 
     # Split by commas and strip whitespace
     mobiles = [m.strip() for m in field.data.split(',') if m.strip()]
 
     if not mobiles:
-        raise ValidationError('At least one mobile number is required')
+        raise ValidationError('⚠️ At least one mobile number is required')
 
     # Bangladeshi mobile pattern: 01XXXXXXXX (11 digits without hyphen)
     mobile_pattern = re.compile(r'^01\d{9}$')
 
     for mobile in mobiles:
         if not mobile_pattern.match(mobile):
-            raise ValidationError(f'Invalid mobile format: {mobile}. Use format 01XXXXXXXXX (11 digits)')
+            raise ValidationError(f'❌ Invalid format: {mobile}. Use 11 digits (e.g. 01XXXXXXXXX)')
         # Check for duplicates in the same field
         if mobiles.count(mobile) > 1:
-            raise ValidationError(f'Duplicate mobile number: {mobile}')
+            raise ValidationError(f'⚠️ Duplicate number: {mobile}')
 
 class RegistrationForm(FlaskForm):
     student_id = StringField('Student ID', validators=[DataRequired(), Length(min=10, max=15)])
@@ -135,9 +135,9 @@ class IdentityVerificationForm(FlaskForm):
                 stored_mobiles = [m.strip() for m in user.mobile.split(',') if m.strip()]
                 entered_mobiles = [m.strip() for m in field.data.split(',') if m.strip()]
                 if not any(em in stored_mobiles for em in entered_mobiles):
-                    raise ValidationError('Mobile number does not match our records.')
+                    raise ValidationError('❌ Mobile number does not match our records.')
             else:
-                raise ValidationError('Student ID not found.')
+                raise ValidationError('❌ Student ID not found.')
 
     mobile = StringField('Mobile Numbers (comma separated)', validators=[DataRequired()])
     faculty = StringField(validators=[DataRequired()])  # Hidden field populated by JS
