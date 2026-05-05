@@ -501,19 +501,6 @@
                                         {{ form.image(class="opacity-0 absolute inset-0 cursor-pointer",
                                         id="imageInput") }}
                                     </label>
-                                    <!-- Auto-closing popup for file size errors -->
-                                    <div id="fileSizePopup"
-                                        class="hidden fixed top-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg shadow-lg z-50 flex items-center justify-between max-w-sm">
-                                        <div class="flex items-center">
-                                            <i class="fas fa-exclamation-triangle mr-2"></i>
-                                            <span class="font-medium">File too large! Please select an image under
-                                                2MB.</span>
-                                        </div>
-                                        <button onclick="closeFileSizePopup()"
-                                            class="ml-3 text-red-700 hover:text-red-900">
-                                            <i class="fas fa-times"></i>
-                                        </button>
-                                    </div>
                                 </div>
 
                                 <!-- Image Cropping Interface -->
@@ -623,24 +610,12 @@
                                 }
                             }
 
-                            function showFileSizePopup() {
-                                fileSizePopup.classList.remove('hidden');
-                                // Auto-close after 3 seconds
-                                setTimeout(() => {
-                                    closeFileSizePopup();
-                                }, 3000);
-                            }
-
-                            function closeFileSizePopup() {
-                                fileSizePopup.classList.add('hidden');
-                            }
-
                             imageInput.addEventListener('change', function (e) {
                                 const file = e.target.files[0];
                                 if (file) {
                                     // Check if file size > 2MB
                                     if (file.size > 2 * 1024 * 1024) {
-                                        showFileSizePopup();
+                                        showToast('The image you selected is too large. Please use a file smaller than 2MB.', 'error');
                                         this.value = ""; // Clear the input
                                         return;
                                     }
@@ -844,13 +819,13 @@
                                             window.location.reload();
                                         }, 500);
                                     } else {
-                                        alert('Upload failed. Please try again.');
+                                        showToast('Update failed. Please try again later.', 'error');
                                         overlay.classList.add('hidden');
                                     }
                                 };
 
                                 xhr.onerror = function () {
-                                    alert('Network error occurred.');
+                                    showToast('Network error occurred. Please check your internet connection.', 'error');
                                     overlay.classList.add('hidden');
                                 };
 
