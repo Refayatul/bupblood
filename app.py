@@ -1951,7 +1951,7 @@ def register():
         # Check if email already exists
         existing_email = User.query.filter_by(email=form.email.data).first()
         if existing_email:
-            flash("An account already exists with this email address.", "warning")
+            flash("⚠️ An account already exists with this email address.", "warning")
             return render_template('register.html', form=form, program_data=PROGRAM_DATA, current_palette=config.current_palette)
 
         # Check if any mobile number already exists
@@ -1969,7 +1969,7 @@ def register():
                 db.func.concat(',', User.mobile, ',').ilike(f'{mobile}')
             ).first()
             if existing_mobile:
-                flash(f"An account already exists with the mobile number {mobile}.", "warning")
+                flash(f"⚠️ An account already exists with the mobile number {mobile}.", "warning")
                 return render_template('register.html', form=form, program_data=PROGRAM_DATA, current_palette=config.current_palette)
 
         # Combine mobiles into comma-separated string
@@ -1985,12 +1985,12 @@ def register():
 
         # Validate that the program belongs to the selected faculty
         if faculty not in PROGRAM_DATA:
-            flash("Invalid faculty selected.", "danger")
+            flash("❌ Invalid faculty selected.", "danger")
             return render_template('register.html', form=form, current_palette=config.current_palette)
 
         faculty_programs = PROGRAM_DATA[faculty]
         if program_key not in faculty_programs:
-            flash("Invalid program selected for the chosen faculty.", "danger")
+            flash("❌ Invalid program selected for the chosen faculty.", "danger")
             return render_template('register.html', form=form, current_palette=config.current_palette)
 
         # Use the program name as department
@@ -2609,7 +2609,7 @@ def add_donation():
 @login_required
 def user_logout():
     logout_user()
-    flash("Logged out successfully.", "success")
+    flash("👋 Logged out successfully.", "success")
     return redirect(url_for('home'))
 
 @app.route('/user/change-password', methods=['GET', 'POST'])
