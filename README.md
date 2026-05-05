@@ -193,7 +193,6 @@ gunicorn app:app -b 0.0.0.0:8086 --workers=4
 1. **Supabase Account** - Create project at [supabase.com](https://supabase.com)
 2. **Vercel Account** - Sign up at [vercel.com](https://vercel.com)
 3. **GitHub Repository** - Code must be in Git repo
-4. **OVH Domain** (optional) - For custom domain
 
 ### Step 1: Supabase Setup
 ```bash
@@ -218,7 +217,6 @@ SUPABASE_KEY=[YOUR-ANON-KEY]
 2. Import repository in Vercel
 3. Add environment variables from `.env`
 4. Deploy
-5. Connect custom OVH domain (optional)
 
 ## 🔒 Security Notes
 
