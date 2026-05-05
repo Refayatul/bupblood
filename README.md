@@ -12,7 +12,7 @@ A comprehensive blood donor management system for Bangladesh University of Profe
 
 ## 🛠️ Tech Stack
 
-- **Backend:** Flask 3.0.3 (Python)
+- **Backend:** Flask 3.1.3 (Python)
 - **Database:** SQLite (local) → Supabase PostgreSQL (production)
 - **Image Storage:** Local static files → Supabase Storage (production)
 - **Frontend:** Tailwind CSS + DaisyUI
