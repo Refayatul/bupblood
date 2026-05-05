@@ -2931,5 +2931,13 @@ def reset_password_with_token(token):
 def contact():
     return render_template('contact.html', current_palette=config.current_palette)
 
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html', current_palette=config.current_palette), 404
+
+@app.errorhandler(500)
+def internal_server_error(e):
+    return render_template('500.html', current_palette=config.current_palette), 500
+
 if __name__ == '__main__':
     app.run(debug=True)

@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="min-h-[70vh] flex flex-col items-center justify-center text-center px-4 animate-fade-in">
+    <div class="relative mb-8">
+        <div class="text-9xl font-black text-gray-100 absolute -inset-4 select-none pointer-events-none">500</div>
+        <div class="relative z-10 text-red-600 text-8xl mb-4">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+    </div>
+    
+    <h1 class="text-4xl font-extrabold text-gray-800 mb-4 bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent">
+        System Error
+    </h1>
+    
+    <p class="text-gray-600 max-w-md mx-auto mb-8 text-lg">
+        Something went wrong on our end. Don't worry, our team of life-savers has been notified and is looking into it.
+    </p>
+    
+    <div class="bg-red-50 p-4 rounded-2xl border border-red-100 mb-8 max-w-md">
+        <p class="text-sm text-red-700 flex items-center justify-center gap-2">
+            <i class="fas fa-info-circle"></i>
+            Tip: Try refreshing the page in a few moments.
+        </p>
+    </div>
+    
+    <div class="flex flex-col sm:flex-row gap-4">
+        <button onclick="window.location.reload()" class="bg-gradient-to-r from-red-600 to-pink-600 text-white py-4 px-8 rounded-2xl shadow-xl hover:shadow-2xl transform hover:-translate-y-1 font-bold transition-all duration-300 flex items-center gap-2">
+            <i class="fas fa-sync-alt"></i> Refresh Page
+        </button>
+        <a href="{{ url_for('home') }}" class="bg-white text-gray-700 py-4 px-8 rounded-2xl border-2 border-gray-100 shadow-lg hover:shadow-xl transform hover:-translate-y-1 font-bold transition-all duration-300 flex items-center gap-2">
+            <i class="fas fa-home"></i> Go Home
+        </a>
+    </div>
+</div>
+{% endblock %}
