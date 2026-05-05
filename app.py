@@ -692,10 +692,10 @@ def login():
 
         if username == admin_username and password == admin_password:
             session['admin_logged_in'] = True
-            flash("Logged in successfully as Admin", "success")
+            flash("✅ Admin access granted. Welcome back!", "success")
             return redirect(url_for('admin_panel'))
         else:
-            flash("Invalid credentials, try again.", "danger")
+            flash("❌ Invalid admin credentials. Please try again.", "danger")
             return redirect(url_for('login'))
     return render_template('login.html', current_palette=config.current_palette)
 
@@ -704,7 +704,7 @@ def login():
 def admin_panel():
     # Ensure admin is logged in
     if 'admin_logged_in' not in session or not session['admin_logged_in']:
-        flash("Access denied. Admins only.", "danger")
+        flash("🚫 Access denied. Administrator privileges required.", "danger")
         return redirect(url_for('login'))
 
     pending_users = User.query.filter_by(is_approved=False, is_deleted=False).all()
@@ -1428,7 +1428,7 @@ def admin_broadcast_email():
     filter_batch = request.form.get('filter_batch', '')
     
     if not subject or not message:
-        flash("Please provide both subject and message.", "warning")
+        flash("⚠️ Both Subject and Message body are required.", "warning")
         return redirect(url_for('admin_panel'))
     
     # Build base query
@@ -1613,11 +1613,11 @@ def admin_edit_user(user_id):
             
             db.session.commit()
             log_admin_action('edit', user, 'Profile updated by admin')
-            flash(f"User '{user.name}' updated successfully!", "success")
+            flash(f"✅ User '{user.name}' updated successfully!", "success")
             return redirect(request.args.get('next') or url_for('admin_panel'))
         except Exception as e:
             db.session.rollback()
-            flash(f"Error updating user: {e}", "danger")
+            flash(f"❌ Error updating user: {e}", "danger")
     
     # Get faculty/program data for dropdowns
     blood_groups = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
@@ -1637,7 +1637,7 @@ def admin_bulk_reset():
         # Set all users to unavailable
         User.query.update({User.is_available: False})
         db.session.commit()
-        flash("All users marked as 'Not Available'.", "success")
+        flash("✅ All users marked as 'Not Available'.", "success")
     except Exception as e:
         db.session.rollback()
         flash(f"Error resetting availability: {e}", "danger")
@@ -1715,7 +1715,7 @@ def admin_approve_all_pending():
                 pass # Don't fail transaction if email fails
             
         db.session.commit()
-        flash(f"Bulk action complete. Approved {count} new donors.", "success")
+        flash(f"✅ Bulk action complete. Approved {count} new donors.", "success")
     except Exception as e:
         db.session.rollback()
         flash(f"Error approving all: {e}", "danger")
@@ -1771,8 +1771,7 @@ def approve_user(user_id):
 
         # Send approval email to user
         send_user_approval_email(user)
-
-        flash(f"User {user.name} has been approved and notified via email.", "success")
+        flash(f"✅ User {user.name} has been approved and notified.", "success")
     return redirect(url_for('admin_panel'))
 
 @app.route('/admin/reject/<int:user_id>', methods=['POST'])
@@ -1946,7 +1945,7 @@ def register():
         # Check if student_id already exists in the database
         existing_user = User.query.filter_by(student_id=student_id).first()
         if existing_user:
-            flash("An account already exists with this Student ID. You can either login with it, reset your password if you forgot it, or contact the admin via email (available on the Contact Us page).", "warning")
+            flash("⚠️ An account already exists with this Student ID. Please login or reset your password.", "warning")
             return redirect(url_for('user_login'))
         
         # Check if email already exists
@@ -1977,7 +1976,7 @@ def register():
         mobile_combined = ','.join(entered_mobiles)
 
         if form.password.data != form.confirm_password.data:
-            flash("Passwords do not match.", "danger")
+            flash("❌ Passwords do not match. Please try again.", "danger")
             return render_template('register.html', form=form, current_palette=config.current_palette)
 
         name = form.name.data
@@ -2446,12 +2445,12 @@ def user_profile():
                 )
 
                 mail.send(msg)
-                flash(f"Profile updated successfully! A verification email has been sent to {form.email.data}. Please verify your new email address.", "success")
+                flash(f"✅ Profile updated successfully! A verification email has been sent to {form.email.data}. Please verify your new email address.", "success")
             except Exception as e:
                 print(f"Verification email error: {e}")
-                flash("Profile updated, but verification email could not be sent. Please contact admin for assistance.", "warning")
+                flash("❌ Profile updated, but verification email could not be sent. Please contact admin for assistance.", "warning")
         else:
-            flash("Profile updated successfully!", "success")
+            flash("✅ Profile updated successfully!", "success")
         
         if form.image.data:
             image_file = form.image.data
@@ -2462,7 +2461,7 @@ def user_profile():
                 image_file.seek(0) # Reset cursor
                 
                 if file_size > 2 * 1024 * 1024:
-                    flash("Image size exceeds 2MB limit. Please choose a smaller image.", "danger")
+                    flash("❌ Image size exceeds 2MB limit. Please choose a smaller image.", "danger")
                     # Re-populate form with current user data to avoid empty fields on reload
                     form.process(obj=current_user)
                     donation_form = DonationForm()
@@ -2487,13 +2486,12 @@ def user_profile():
                     
                     current_user.image = supabase.storage.from_("images").get_public_url(image_filename)
                 else:
-                    flash("Supabase not configured. Image not uploaded.", "warning")
+                    flash("⚠️ Supabase not configured. Image not uploaded.", "warning")
             except Exception as e:
                 print(f"Error uploading to Supabase: {e}")
-                flash("Error uploading image.", "danger")
+                flash("❌ Error uploading image.", "danger")
 
         db.session.commit()
-        flash("Profile updated successfully!", "success")
         return redirect(url_for('user_profile'))
     
     elif request.method == 'GET':
@@ -2548,7 +2546,7 @@ def complete_profile():
         current_user.department = form.program.data  # Store the full program name
         current_user.is_available = form.is_available.data
         db.session.commit()
-        flash("Profile completed successfully!", "success")
+        flash("✅ Profile completed successfully!", "success")
         return redirect(url_for('user_profile'))
     
     return render_template('complete_profile.html', form=form, current_palette=config.current_palette)
@@ -2560,7 +2558,7 @@ def add_donation():
     form = DonationForm()
     if form.validate_on_submit():
         if form.donation_date.data > date.today():
-            flash("Donation date cannot be in the future.", "danger")
+            flash("❌ Donation date cannot be in the future.", "danger")
             return redirect(url_for('user_dashboard'))
 
         # Check for overlap with existing donations (must be at least 90 days apart)
@@ -2568,7 +2566,7 @@ def add_donation():
         for donation in existing_donations:
             delta = abs((form.donation_date.data - donation.donation_date).days)
             if delta < 90:
-                flash(f"Invalid date! You donated on {donation.donation_date}. Minimum gap is 90 days.", "danger")
+                flash(f"⚠️ Invalid date! You donated on {donation.donation_date}. Minimum gap is 90 days.", "danger")
                 return redirect(url_for('user_dashboard'))
 
         new_donation = Donation(
@@ -2601,9 +2599,9 @@ def add_donation():
             
         db.session.add(new_donation)
         db.session.commit()
-        flash("Donation record added successfully!", "success")
+        flash("✅ Donation record saved! Thank you for your contribution.", "success")
     else:
-        flash("Error adding donation record. Please check the date.", "danger")
+        flash("❌ Error saving donation record. Please check the details.", "danger")
         
     return redirect(url_for('user_dashboard'))
 
@@ -2621,23 +2619,23 @@ def change_password():
     if form.validate_on_submit():
         # Check if current password is correct
         if not current_user.check_password(form.current_password.data):
-            flash("Current password is incorrect.", "danger")
+            flash("❌ Current password is incorrect.", "danger")
             return render_template('change_password.html', form=form, current_palette=config.current_palette)
         
         # Check if new passwords match
         if form.new_password.data != form.confirm_password.data:
-            flash("New passwords do not match.", "danger")
+            flash("❌ New passwords do not match.", "danger")
             return render_template('change_password.html', form=form, current_palette=config.current_palette)
         
         # Check if new password is different from current
         if form.current_password.data == form.new_password.data:
-            flash("New password must be different from current password.", "warning")
+            flash("⚠️ New password must be different from current password.", "warning")
             return render_template('change_password.html', form=form, current_palette=config.current_palette)
         
         # Update password
         current_user.set_password(form.new_password.data)
         db.session.commit()
-        flash("Password changed successfully!", "success")
+        flash("✅ Password updated successfully!", "success")
         return redirect(url_for('user_dashboard'))
     
     return render_template('change_password.html', form=form, current_palette=config.current_palette)
@@ -2663,24 +2661,24 @@ def forgot_password():
                 reset_url = url_for('reset_password_with_token', token=reset_token, _external=True)
 
                 if send_password_reset_email(user, reset_url):
-                    flash("Password reset link sent to your registered email. Please check your inbox (and spam folder).", "success")
+                    flash("✅ Password reset link sent to your registered email. Please check your inbox (and spam folder).", "success")
                     return redirect(url_for('user_login'))
                 else:
-                    flash("Failed to send email. Please contact admin.", "danger")
+                    flash("❌ Failed to send email. Please contact admin.", "danger")
             
             # SCENARIO B: User has Email but UNVERIFIED
             elif user.email and not user.email_verified:
-                 flash("Your email address is not verified. Please contact your department admin to verify your account manually.", "warning")
+                 flash("⚠️ Your email address is not verified. Please contact your department admin to verify your account manually.", "warning")
 
             # SCENARIO C: NO EMAIL (Legacy Account) -> Fallback to complex identity verification
             else:
-                flash("No email linked to this account. Please verify your identity.", "info")
+                flash("ℹ️ No email linked to this account. Please verify your identity.", "info")
                 return redirect(url_for('verify_identity', student_id=user.student_id))
         else:
             # Security: Don't reveal if user exists or not, but for this specific university context 
             # where IDs are public, we might be more lenient, but standard practice is generic message.
             # However, for UX in this closed system, we'll say:
-            flash("No account found with that Email or Student ID.", "danger")
+            flash("❌ No account found with that Email or Student ID.", "danger")
             
     return render_template('forgot_password.html', form=form, current_palette=config.current_palette)
 
@@ -2703,12 +2701,12 @@ def verify_identity():
         program_key = form.program.data
 
         if faculty not in PROGRAM_DATA:
-            flash("Invalid faculty selected.", "danger")
+            flash("❌ Invalid faculty selected.", "danger")
             return render_template('verify_identity.html', form=form, program_data=PROGRAM_DATA, current_palette=config.current_palette)
 
         faculty_programs = PROGRAM_DATA[faculty]
         if program_key not in faculty_programs:
-            flash("Invalid program selected.", "danger")
+            flash("❌ Invalid program selected.", "danger")
             return render_template('verify_identity.html', form=form, program_data=PROGRAM_DATA, current_palette=config.current_palette)
 
         user = User.query.filter_by(student_id=form.student_id.data).first()
@@ -2725,24 +2723,24 @@ def verify_identity():
             )
 
             if not verification_passed:
-                flash("Identity verification failed. Details do not match.", "danger")
+                flash("❌ Identity verification failed. Details do not match.", "danger")
             else:
                 # Verification SUCCESS
                 
                 # Check if they have already abused this manual reset?
                 if user.has_reset_password:
-                     flash("You have already used the manual recovery option once. Please contact admin.", "danger")
+                     flash("⚠️ You have already used the manual recovery option once. Please contact admin.", "danger")
                      return redirect(url_for('contact'))
                 
                 # Allow Reset
                 session['reset_user_id'] = user.id
                 session['email_verified'] = True # Bypass email check for this session
                 
-                flash("Identity confirmed. Please set a new password immediately.", "success")
+                flash("✅ Identity confirmed. Please set a new password immediately.", "success")
                 return redirect(url_for('reset_password'))
 
         else:
-            flash("Student ID not found.", "danger")
+            flash("❌ Student ID not found.", "danger")
 
     return render_template('verify_identity.html', form=form, program_data=PROGRAM_DATA, current_palette=config.current_palette)
 
@@ -2761,10 +2759,10 @@ def verify_email():
     if form.validate_on_submit():
         if form.email.data.lower().strip() == user.email.lower().strip():
             session['email_verified'] = True
-            flash("Email verified successfully.", "success")
+            flash("✅ Email verified successfully.", "success")
             return redirect(url_for('reset_password'))
         else:
-            flash("Email does not match.", "danger")
+            flash("❌ Email does not match.", "danger")
             
     return render_template('verify_email.html', form=form, masked_email=masked, current_palette=config.current_palette)
 
@@ -2781,7 +2779,7 @@ def reset_password():
     form = ResetPasswordForm()
     if form.validate_on_submit():
         if form.new_password.data != form.confirm_password.data:
-            flash("Passwords do not match.", "danger")
+            flash("❌ Passwords do not match.", "danger")
         else:
             user.set_password(form.new_password.data)
             user.has_reset_password = True  # Mark that user has used forgot password
@@ -2791,7 +2789,7 @@ def reset_password():
             session.pop('reset_user_id', None)
             session.pop('email_verified', None)
             
-            flash("Password reset successful. Please login.", "success")
+            flash("✅ Password reset successful. Please login.", "success")
             return redirect(url_for('user_login'))
             
     return render_template('reset_password.html', form=form, current_palette=config.current_palette)
@@ -2804,12 +2802,12 @@ def delete_donation(donation_id):
     
     # Check ownership
     if donation.user_id != current_user.id:
-        flash("You do not have permission to delete this record.", "danger")
+        flash("❌ You do not have permission to delete this record.", "danger")
         return redirect(url_for('user_dashboard'))
     
     # Check 1-week limit
     if (date.today() - donation.donation_date).days > 7:
-        flash("You can only delete donation records within 1 week of the donation date.", "warning")
+        flash("⚠️ You can only delete donation records within 1 week of the donation date.", "warning")
         return redirect(url_for('user_dashboard'))
         
     db.session.delete(donation)
@@ -2823,7 +2821,7 @@ def delete_donation(donation_id):
             current_user.last_donation_date = None
             
     db.session.commit()
-    flash("Donation record deleted successfully.", "success")
+    flash("✅ Donation record deleted successfully.", "success")
     return redirect(url_for('user_dashboard'))
 
 @app.route('/user/edit_donation/<int:donation_id>', methods=['GET', 'POST'])
@@ -2833,12 +2831,12 @@ def edit_donation(donation_id):
     
     # Check ownership
     if donation.user_id != current_user.id:
-        flash("You do not have permission to edit this record.", "danger")
+        flash("❌ You do not have permission to edit this record.", "danger")
         return redirect(url_for('user_dashboard'))
     
     # Check 1-week limit
     if (date.today() - donation.donation_date).days > 7:
-        flash("You can only edit donation records within 1 week of the donation date.", "warning")
+        flash("⚠️ You can only edit donation records within 1 week of the donation date.", "warning")
         return redirect(url_for('user_dashboard'))
         
     form = DonationForm()
@@ -2858,7 +2856,7 @@ def edit_donation(donation_id):
             current_user.last_donation_date = None
         db.session.commit()
         
-        flash("Donation record updated successfully.", "success")
+        flash("✅ Donation record updated successfully.", "success")
         return redirect(url_for('user_profile'))
     
     # Pre-fill form
@@ -2887,17 +2885,17 @@ def verify_email_address(token):
         if user and not user.email_verified:
             user.email_verified = True
             db.session.commit()
-            flash("Email verified successfully! Your account will now need admin approval before you can login.", "success")
+            flash("✅ Email verified successfully! Your account will now need admin approval before you can login.", "success")
             return redirect(url_for('user_login'))
         else:
-            flash("Email already verified or invalid token.", "info")
+            flash("ℹ️ Email already verified or invalid token.", "info")
             return redirect(url_for('user_login'))
     except SignatureExpired:
-        flash("Verification link expired. Please register again.", "warning")
+        flash("⚠️ Verification link expired. Please register again.", "warning")
         return redirect(url_for('register'))
     except Exception as e:
         print(f"Email verification error: {e}")
-        flash("Invalid verification link.", "danger")
+        flash("❌ Invalid verification link.", "danger")
         return redirect(url_for('user_login'))
 
 @app.route('/reset-password/<token>', methods=['GET', 'POST'])
@@ -2906,23 +2904,23 @@ def reset_password_with_token(token):
         email = serializer.loads(token, salt='password-reset', max_age=3600)  # 1 hour
         user = User.query.filter_by(email=email).first()
         if not user:
-            flash("Invalid reset link.", "danger")
+            flash("❌ Invalid reset link.", "danger")
             return redirect(url_for('user_login'))
 
         form = ResetPasswordForm()
         if form.validate_on_submit():
             if form.new_password.data != form.confirm_password.data:
-                flash("Passwords do not match.", "danger")
+                flash("❌ Passwords do not match.", "danger")
             else:
                 user.set_password(form.new_password.data)
                 user.has_reset_password = True
                 db.session.commit()
-                flash("Password reset successful. Please login.", "success")
+                flash("✅ Password reset successful. Please login.", "success")
                 return redirect(url_for('user_login'))
 
         return render_template('reset_password_with_token.html', form=form, current_palette=config.current_palette)
     except SignatureExpired:
-        flash("Password reset link expired. Please request a new one.", "warning")
+        flash("⚠️ Password reset link expired. Please request a new one.", "warning")
         return redirect(url_for('forgot_password'))
     except Exception as e:
         print(f"Password reset error: {e}")
