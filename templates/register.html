@@ -361,18 +361,8 @@
 
                     {{ form.image(class="opacity-0 absolute inset-0 cursor-pointer", id="imageInput") }}
                 </label>
-                <!-- Auto-closing popup for file size errors -->
-                <div id="fileSizePopup"
-                    class="hidden fixed top-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg shadow-lg z-50 flex items-center justify-between max-w-sm">
-                    <div class="flex items-center">
-                        <i class="fas fa-exclamation-triangle mr-2"></i>
-                        <span class="font-medium">File too large! Please select an image under 2MB.</span>
-                    </div>
-                    <button onclick="closeFileSizePopup()" class="ml-3 text-red-700 hover:text-red-900">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
             </div>
+
 
             <!-- Image Cropping Interface -->
             <div id="cropContainer" class="hidden mt-6 p-6 bg-gray-50 rounded-xl border border-gray-200">
@@ -581,17 +571,7 @@
                 }
             }
 
-            function showFileSizePopup() {
-                fileSizePopup.classList.remove('hidden');
-                // Auto-close after 3 seconds
-                setTimeout(() => {
-                    closeFileSizePopup();
-                }, 3000);
-            }
 
-            function closeFileSizePopup() {
-                fileSizePopup.classList.add('hidden');
-            }
 
             if (imageInput) {
                 imageInput.addEventListener('change', function (e) {
@@ -599,7 +579,7 @@
                     if (file) {
                         // Check if file size > 2MB
                         if (file.size > 2 * 1024 * 1024) {
-                            showFileSizePopup();
+                            showToast('The image you selected is too large. Please use a file smaller than 2MB.', 'error');
                             this.value = ""; // Clear the input
                             return;
                         }
